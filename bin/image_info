@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+source $HOME/.dockrc
+source $DOCK_PATH/lib/image.sh
+source $BASHJAZZ_PATH/utils/colors.sh
+source $BASHJAZZ_PATH/utils/split_string.sh
+source $BASHJAZZ_PATH/utils/assign_vars_from_out.sh
+
+# Using default image if no argument is passed
+if [[ -z $1 ]]; then
+
+  echo "repo_name=$DEFAULT_REPO_NAME"
+  echo "image_name=$DEFAULT_IMAGE_NAME"
+  echo "tag_name=$DEFAULT_IMAGE_TAG_NAME"
+  echo "full_image_name=$DEFAULT_REPO_NAME/$DEFAULT_IMAGE_NAME:$DEFAULT_IMAGE_TAG_NAME"
+
+# Image name is provided in some form, so we need to guess is it just the name,
+# or repo+name or something else
+else
+
+  Image_print_info $1 | assign_vars_from_out
+
+  if [[ -n $repo_name ]]; then
+    image_names=( "$repo_name/$image_name:$tag_name" )
+  else
+    # User is unsure about the repository. Let's come up with some
+    # of the combinations possible names user might have meant.
+    # We'll run them through a regexp condition later, so it doesn't
+    # really matter much if we 
+    image_names=(                                        \
+      "$DEFAULT_REPO_NAME/$image_name:$tag_name"         \
+      "$DEFAULT_REPO_NAME/$image_name"                   \
+      "$image_name:$tag_name"                            \
+    )
+  fi
+
+  # For some weird reason in Docker {{.Repository}} also includes image name
+  # (with slash separating repo name from the image name).
+  docker_images=$(docker images --format '{{.Repository}}:{{.Tag}}')
+  for i in "${image_names[@]}"; do
+    # Delete elements which clearly have no image name in them:
+    if [[ $i =~ (^:|/:) ]]; then
+      image_names=( "${image_names[@]/$i}" )
+    elif [[ -z $full_image_name ]]; then
+      full_image_name=$( echo "$docker_images" | grep "$i")
+    fi
+  done
+
+  if [[ -n "$full_image_name" ]]; then
+    # The following line makes sure we get the first image that matches
+    # the name. If there's any inconsistency, ../lib/decision_tree.sh will
+    # report it and exit with error. The most likely scenario for error in this
+    # case is this following:
+    #
+    #   1. User made changes to the container
+    #   2. User committed container to an image of the same name
+    #      (Thus, the image the current container is based on became tagless)
+    #   3. User tried to re-connect with `dock same/image:name`
+    #
+    #   ...which would be a very rare case. If they simply re-connected
+    #   with `dock` (no positional arguments) they wouldn't see any errors.
+    #   So really, this is just an edge case I discovered and a small precaution
+    #   against it.
+    #
+    full_image_name="$(echo "$full_image_name" | head -n1)"
+    # repeat this call, because the result might be different now.
+    Image_print_info $full_image_name | assign_vars_from_out
+    echo "repo_name=$repo_name"
+    echo "image_name=$image_name"
+    echo "tag_name=$tag_name"
+    echo "full_image_name=$full_image_name"
+  fi
+
+fi

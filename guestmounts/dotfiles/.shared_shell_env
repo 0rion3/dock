@@ -1,0 +1,59 @@
+# This file is sourced by ~/.bashrc and ~/.zshrc
+# More or less standard stuff
+
+git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
+}
+
+git_branch_pure() {
+  git rev-parse --abbrev-ref HEAD
+}
+
+git_rebase_to() {
+  git checkout $1
+  git rebase master
+  git checkout master
+}
+
+git_merge_to() {
+  git checkout $1
+  git merge master
+  git checkout master
+}
+
+git_fetch_remote_branch() {
+  git fetch origin
+  git checkout origin/$1 --track
+}
+
+alias apt-get_clean_dry-run="apt-get clean --dry-run"
+
+# ALIASES
+alias gs='git status'
+alias ga='git add'
+alias gaa='git add -A'
+alias gc='git commit'
+alias gca='git commit -a'
+alias gcam='git commit -a -m '
+alias gl='git log --pretty=format:"%an, %ar, %h: %s"'
+alias gd='git diff'
+alias gb='git branch'
+alias gco='git checkout'
+alias gbc='git checkout -b'
+alias gd1='echo "git diff HEAD"; git diff HEAD'
+alias gd2='echo "git diff HEAD^"; git diff HEAD^'
+alias gp='git pull'
+alias gpp='git pull && git push'
+alias gph='git push'
+alias gm='git merge'
+git_branch_pure="git rev-parse --abbrev-ref HEAD"
+alias gph1st="git push -u origin \$(git_branch_pure)"
+alias git-prev="git checkout HEAD^1"
+alias gfetch=git_fetch_remote_branch
+alias gsu="git submodule update"
+
+alias ls="ls -al --block-size=K --color"
+
+if [ -f $HOME/.local_env ]; then
+  source $HOME/.local_env
+fi

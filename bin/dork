@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#
+# `dork` or `dock-orchestrate` is a script that uses the `dock` script to launch/manage
+# multiple containers that are interdependent in some ways. This is generally aimed at launching
+# a project consisting of many micro-services.
+#
+# Dork settings are not spread out amongst repositories that a project consists of, but are rather
+# concentrated in its own repository, making it completely separate from the rest of the code base,
+# such that it doesn't force anyone to use Dork if they don't want to. The base path for
+# dork settings repos is determined by the DORK_REPOS_PATH environment variable defined in ~/.dockrc
+# Then, when you want to launch a particular project, you just say 
+#
+#   $ dork big_project_name
+#   OR
+#   $ dork big/project/name
+#
+# in which case, the script will attempt to read the settings from
+# $DORK_REPOS_PATH/big_project_name or $DORK_REPOS_PATH/big/project/name respectively.
+#
+# If run with no arguments, the script attempts to read project settings from current directory.
+# By default, settings are read from local.dork.conf file (which represents local/development
+# environment settings to be used to launch a set of containers). However, you can specify a different
+# environment/config file in the second argument:
+#
+#   $ dork big_project_name production
+#
+# and the script will read production.dork.conf instead. It is also possible to run
+# scripts instead of using config files - all you need to do is have a script named *.dork.sh in
+# the project directory and then that script will be run instead.
+
+# The point of using environments is not simply to run projects in development or production modes,
+# but to also be able to launch a different set of containers configured in a certain way -
+# depending on the needs of a particular person working with the project on their machine.
+# For example, I may not be interested in dealing with the authentication service while working on
+# the project, perhaps, I'd be able to configure a set of containers in such a way as to avoid launching
+# the authentication service altogether, while still being able to work on part of the project that I need.
+#
+# At this point you may ask - why have a directory for each dork project if I only need 1 environment?
+# It is a legitimate question and the answer is you don't need to. You may specify a file to be used
+# (instead of the path) - and `dork` will recognize it's a file (again, it could be *.dork.conf or *.dork.sh).
+# However, keep in mind that you might want to have a dedicated directory for dork project settings
+# for a number of reasons:
+#
+#   1. You want to have your project settings checked into a version control system.
+#
+#   2. Even you when have one environment, this environment might require you to have
+#      many config files for various parts of the stack (nginx, postgres, redis etc),
+#      which you might want to store in that directory.

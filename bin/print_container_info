@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+source $BASHJAZZ_PATH/utils/formatting.sh
+
+echo -e "$(ind 2)${Light_Gray}CONTAINER INFO:"
+echo -e "$(ind 4; color light_gray)id: $(color light_blue)$container_id$(color off)"
+echo -e "$(ind 4; color light_gray)name: $(color light_blue; color bold)$container_name$(color off)"
+echo -e "$(ind 4; color light_gray)ip address: $(color light_blue)$container_ip_addr$(color off)"
+echo -e "$(ind 4; color light_gray)based on image: $(color green)$full_image_name$(color off)\n"

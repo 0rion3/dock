@@ -1,0 +1,165 @@
+THE DECISION TREE
+-----------------
+This a scheme (which is followed to the letter by the code implementation in
+./lib/decisition_tree.sh) of how `dock` picks image names, container names,
+and decides what to do about all that.
+
+      > "I quit. It's alright mending fences and chopping wood, mister,
+      > but this potato business is decision after decision after decision!"
+
+  1. $arg1 AND $arg2 PROVIDED by user
+  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  By far, this is the least ambiguous case, but involves more typing on the
+  |  part of user.
+  |
+  |  1) IMAGE and CONTAINER both EXIST
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  Their names matching $arg1 and $arg2 respectively. The image name
+  |  |  may match $arg1 fully (repo/name:tag) or partially (name), while
+  |  |  $arg2 must match the container name fully, for example `dock
+  |  |  local/ubuntu:stable my.pet.project` must find an image named
+  |  |  "local/ubuntu:stable" and a container named "my.pet.project" with
+  |  |  the container being based on that image. Similarly if you just
+  |  |  specified image name, it'd work with `dock ubuntu my.pet.project`.
+  |  |
+  |  |¯¯¯¯| IMPLIED MEANING: user knows exactly which container based on which
+  |  |    | image they want to start or connect to.
+  |  |    |
+  |  |    |–––› RESULTING ACTIONS: (START, CONNECT)
+  |  |
+  |  2) IMAGE EXISTS
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  Image name matches $arg1 fully (repo/name:tag) or partially (name),
+  |  |  but NO CONTAINER which name matches $arg2 is found.
+  |  |
+  |  |¯¯¯¯| IMPLIED MEANING: user wants to create a new container based on the
+  |  |    | image name they provided in $arg2 and with
+  |  |    | a specific name they provided in $arg2
+  |  |    |
+  |  |    |–––› RESULTING ACTIONS: (CREATE, START, CONNECT)
+  |  |    x
+  |  3) NO CONTINER OR IMAGE FOUND
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  Nothing matched: an image with with the full or partial matching $arg1
+  |  |  doesn't exist, nor does the container with name specified in $arg2.
+  |  |
+  |  |¯¯¯¯¯| IMPLIED MEANING: user made a mistake
+  |  |     |–––› RESULTING ACTIONS: (ERROR)
+  |  |     x
+  |  |
+  |  4) CONTAINER EXISTS, but NO IMAGE FOUND
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  The container name matched $arg2 fully, however no image name matched
+  |  |  $arg1 fully (repo/name:tag) or partially (name).
+  |  |
+  |  ¯¯¯¯¯¯| IMPLIED MEANING: user made a mistake
+  |        |–––› RESULTING ACTIONS: (ERROR)
+  |        x
+  x
+
+  2. ONLY $arg1 PROVIDED by user
+  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  The most complicated case where the script has to make its best guess as to
+  |  what the user really meant, because $arg1 can either be IMAGE name
+  |  or CONTAINER name, and the rest we'll we'll need to figure out on our own.
+  |  Priority is given to $arg1 being the value for container name lookup,
+  |  current path is used.
+  |¯¯|
+  |  1) CONTAINER EXISTS matching $arg1
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  Name of the container must match $arg1 fully
+  |  |
+  |  |¯¯¯¯| IMPLIED MEANING: no ambiguity here - user meant a particular
+  |  |    | container. It makes no difference what the current directory is,
+  |  |    | as it'll be ignored, because the container already exists with
+  |  |    | directories mounted into it that that the user actually
+  |  |    | meant to mount.
+  |  |    |
+  |  |    |–––› RESULTING ACTIONS: (START, CONNECT)
+  |  |    x
+  |  |
+  |  2) CONTAINER NOT FOUND, try searching for an image
+  |  |
+  |  |
+  |  |¯¯¯¯a) IMAGE matching $arg1 and CONTAINER matching current dir EXIST,
+  |  |    |  image name can match fully (repo/name:tag) or partially (name)
+  |  |    |  and container name is with a name derived from the current dir
+  |  |    |  also exists and is based in the same image.
+  |  |    |
+  |  |    |¯¯¯¯| IMPLIED MEANING: user specified image thinking container
+  |  |    |    | doesn't exist. But since it does exist, we just connect him
+  |  |    |    | to it.
+  |  |    |    |
+  |  |    |    |–––› RESULTING ACTIONS: ([START], CONNECT)
+  |  |    |
+  |  |    b) IMAGE matching EXISTS, but NO CONTAINER found
+  |  |    |  image name can match fully (repo/name:tag) or partially (name);
+  |  |    |  we also check 
+  |  |    |
+  |  |    |¯¯¯¯| IMPLIED MEANING: user either though container had not existed
+  |  |    |    | while it had been created. Since container names cannot be
+  |  |    |    | be identical, we do not have to worry that multiple containers
+  |  |    |    | with the same name are associated with this directory were
+  |  |    |    | were created. We simply connect to existing one.
+  |  |    |    |
+  |  |    |    |–––› RESULTING ACTIONS: (CREATE, START, CONNECT)
+  |  |    |
+  |  |    c) IMAGE matching $arg1 exists, but an existing the container name
+  |  |    |  associated with the current directory is based on a different image.
+  |  |    |
+  |  |    |¯¯¯¯| IMPLIED MEANING: user either made a mistake thinking container
+  |  |    |    | didn't exist or wanted to create another container for the
+  |  |    |    | current directory, but based on a different image.
+  |  |    |    |
+  |  |    |    |–––› RESULTING ACTIONS: (ERORR)
+  |  |    |    |     We inform the user he either had made a mistake or that
+  |  |    |    |     a different container name must be provided via $arg2.
+  |  |    |
+  |  |    d) NO IMAGE and NO CONTAINER name matches found.
+  |  |    |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |    |  The script couldn't find any CONTAINER name matching $arg1 fully or
+  |  |    |  or IMAGE name matching $arg1 (repo/name:tag) or partially (name).
+  |  |    |
+  |  |    ¯¯¯¯¯| IMPLIED MEANING: user made a mistake
+  |  |         |–––› RESULTING ACTIONS: (ERROR)
+  |  |         x
+  |  x
+  x
+
+  3. NO POSITIONAL ARGUMENTS PROVIDED
+  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |
+  |  1) CONTAINER EXISTS and its name is derived from the current path
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  The name of the container can be associated with a certain path. Please
+  |  |  read the IMPLICIT CONTAINER NAMING section, but basically it's path
+  |  |  reversed and slashes replaced with dots, so path "~/my/new/project" is
+  |  |  turned into "project.new.my". If a container with such name exists -
+  |  |  it's a match.
+  |  |
+  |  |¯¯¯¯| IMPLIED MEANING: user knows exactly which container based
+  |  |    | on which image they want to start or connect to.
+  |  |    |
+  |  |    |–––› RESULTING ACTIONS: (START, CONNECT)
+  |  |    x
+  |  |
+  |  2) DEFAULT IMAGE specified in ~/.dockrc exists
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  While no CONTAINER found (which was given a priority), a default
+  |  |  is being used to create a new container with the name derived
+  |  |  from the current directory path.
+  |  |
+  |  |¯¯¯¯| IMPLIED MEANING: user wants to create a new container based on
+  |  |    | the default image specified in ~/.dockrc
+  |  |    |
+  |  |    |–––› RESULTING ACTIONS: (CREATE, START, CONNECT)
+  |  |    x
+  |  |
+  |  3) NO CONTAINER FOUND, DEFAULT IMAGE MISSING
+  |  |  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  |  |  This is a rare case, but might happen if installation went wrong or
+  |  |  a mistake was made while manually modifying ~/.dockrc file.
+  |  |
+  |  ¯¯¯¯¯|–––› RESULTING ACTIONS: (ERROR)
+  |       x
+  x

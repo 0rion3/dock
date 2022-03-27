@@ -1,0 +1,64 @@
+SATELLITE PROJECTS
+------------------
+This file is just an outline, if you may. Exact details may change and
+suggestions are welcome. It's just that oftentimes you find yourself writing
+one thing and needing another thing too, but you have no place properly log
+the thoughts on that other thing. So, I thought, I'll just handle it in a very
+improper way and will just list those things here. These project might be in
+different states of readiness. If not ready at all, it'll be marked as WIP.
+
+
+  BASHJAZZ UTILS
+  --------------
+  Repository: https://gitea.orion3.space/bashjazz/utils
+
+  This a collection of utils that I found very useful in daily life, regardless
+  of whether I use `dock` or not, although the `dock` project heavily relies
+  on this `bashjazz/utils` for some of the scripts.
+
+  Scripts are mostly POSIX compatible, so should work on FreeBSD, MacOSX and
+  Linux alike. I haven't tested all of them for portability - but certainly
+  the ones used by `dock`. Additionally, I made sure that bash executables start
+  with `#!/usr/bin/env bash` (as paths may differ on different systems) and
+  that options for program such as `grep` or `sed` are universally accepted.
+
+  This repository is mounted inside every container launched by `dock`.
+
+
+  BASHJAZZ NETWORK
+  ----------------
+  Repository: https://gitea.orion3.space/bashjazz/utils
+
+  I'm currently using them for my Docker dock-compatible images that work as
+  vpn or tor proxies, but there's other stuff in there too. This repository is
+  mounted inside every container launched by `dock` too, but I don't recall any
+  of the network scripts to be used in the standard Ubuntu 20.04 image provided
+  by `dock`.
+
+
+  TiXT (WIP)
+  ----------
+  Repository: https://gitea.orion3.space/orion3/TiXT
+
+  A set of scripts to parse arbitrary plaintext format into other formats,
+  starting with HTML, but eventually other formats may be added. In a way,
+  TiXT is sort of a transpiler. Main usage will for the `dock` project will
+  be to easily convert documentation and other text files into HTML pages.
+
+  Currently some work is being done to outline the spec of how plaintext files
+  with very limited formatting may be parsed and presented, so that they're both 
+  nice to read in text format without any formatting whatsoever, but can also be
+  formatted to display colors and other formatting options in terminals as well
+  as converted into an HTML page. In fact this and other plaintext files
+  in this project - such as ./README, for example - are already written with the
+  goal of being a valid as this extended plaintext format.
+
+    You may ask, but what about Markdown?
+
+    Markdown is a waste of time. It is NOT readable in plaintext and you also
+    have to remember it's syntax. The idea is to have a simpler and more flexible
+    format that's intuitive to write - such that maybe a lot of existing plaintext
+    READMEs and other documentation files can appear valid to the parser.
+
+    Please see TiXT repository's documentation files for more information:
+      https://gitea.orion3.space/orion3/TiXT/src/branch/master/docs 

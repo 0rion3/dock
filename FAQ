@@ -1,0 +1,101 @@
+FREQUENTLY ASKED QUESTIONS
+--------------------------
+Of course, no one yet asked anything, but consider this a sort of extended
+README, only each statement is shorter and to the point, and also not always
+directly related to the project itself. Yet I think it would help understand
+it better.
+
+  Have you use DOCK it yourself?
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  Yes. As of March 23, 2022 - it's probably been a year and a half since I
+  wrote the first version of the `dock` script that I immediately started
+  using. I never liked Docker, especially when it was imposed on teams. The
+  win was supposed to be easy on-boarding, but the price was constant image
+  updates and misery for the rest of the team.
+
+  This tool, `dock`, on the other hand, doesn't care about anyone else on the
+  team using it. So I thought I wanted something that no one could object.
+  `dock` is meant for developer machines first and foremost.
+
+
+  Why not just use Docker and some aliases?
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  There are some aliases that I use, they're actually mentioned in README.
+  But, firstly, I wanted just one command, so I don't have to adjust every
+  time and google it. If I needed a Python env, I'd make one myself - with
+  my own shell and Vim settings and all of that. My personal experience was:
+  I spent a lot of time in a terminal, so it makes sense to make a good base
+  image with all the right tools mounted into it. NOTE: the nice bash utils
+  are mounted, they're not part of the base image.
+
+
+  Why write it in Bash?
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  Because it's everywhere. Bash outlived a lot of things, it doesn't change
+  much and POSIX tools are available on every UNIX system. Dependencies are
+  minimal. Bash isn't really scary, just annoying sometimes. So why would I even
+  rely on Docker in the future, when I can add other container engines?
+
+
+  Why not host it on Github or Gitlab?
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  Short answer: I don't care. Also, I'd like to try and migrate to Fossil SCM.
+  Yet another reason is that ALL OF IT wasn't mean to be this way...
+  The internet, I mean. It has become centralized to the point where it's simply
+  impossible to fetch any information if you, say, disable Javascript or
+  enable some other ad-blockers and fingerprint-blockers. This repository is
+  just a tiny step towards detaching from all the social media. Those
+  who care, will care.
+
+
+  How can I contribute?
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  Send me an email with a link to your cloned repository, no matter where
+  it's hosted. Or I might send an invitation to register on my Gitea instance.
+  Contact details can be found in the ./MAINTAINERS file.
+
+  You can also request a feature or report a bug. It would be greatly
+  appreciated if along with those requests you sent a donation. But please email
+  first in that case, if you want to make sure something is done exactly
+  the way you want.
+
+  All other donations without any requests attached are appreciated even more
+  and should be sent to this Bitcoin address:
+
+      bc1qdlmcllxhdydt8ghnf0nhwz78n4c8lutncxhdfu
+
+
+  Are there other useful images for dock?
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  Yes, their release depends on donations I manage to gather. I have
+  images for PHP, Ruby, Python, Bitcoin Core, Wireguard + TOR + Privoxy,
+  and some others too. They need some additional preparation, as well as
+  a bit of documentation written. This takes time and time is money.
+
+
+  If there's no forum, issues or any way to have a group discussion,
+  how would communication in software projects work?
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  That's one of those things I've been thinking about and why I decided not
+  to have a blog post or a page with comments or a Github account. I think
+  good communities are small and select their members wisely. They're not
+  shiny forums with avatars and endless captchas you need to solve to even
+  sign up. They're something else.
+
+
+P.S.
+----
+
+If you'd like to know more, you can ask (email). But I can't promise you
+I respond. Good things need good people and funding and none shall be seeking
+profit. I'm not counting on donations much, only myself. When I can,
+I'll be moving things forward on my own. I don't think I want Merge Requests
+flying in my direction right now, that' wouldn't be helpful.
+
+The reasons I decided to release this software now is because it's been a year
+and a half since I've been using it myself and I thought the moment was right
+to do that - and maybe help other people too - in multiple ways.
+
+Don't be thinking this isn't selfish. Nothing isn't. Most of the time we are
+blissfully ignorant of our true motivations. The hope is that our own ignorance
+is our unexpected virtue as well.

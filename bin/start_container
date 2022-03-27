@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+source $HOME/.dockrc
+source $DOCK_PATH/lib/container.sh
+source $BASHJAZZ_PATH/utils/split_string.sh
+source $BASHJAZZ_PATH/utils/formatting.sh
+
+# Mounting directories inside the guest.
+# There are two ways to mount directories inside a guest when using dock:
+#
+# 1. CLI-arguments. This takes precedence over whatever in ~/.dockrc
+#
+# 2. $HOME/.dockrc file
+#
+# The $DEFAULT_MOUNT_OPTIONS variable defined in ~/.dockrc holds an array or values
+# that are passed to `docker run` command in this script. The default behavior is
+# to mount the current project directory ($PWD) as /home/docker/main and
+# to mount the $HOME/dev directory as /home/docker/dev inside the guest.
+# The $DEFAULT_MOUNT_OPTIONS contains source:target values separated by : as well
+# as read/write mounting mode also separated by the ":" character.
+# It's exactly the same as what `docker run` expects as
+# a value after as a value for `-v`.
+
+if [[ "$create_new_container" == "yes" ]]; then
+
+  # Assigning a specifically designated ip-address to a container
+  # if one exists in $ASSIGNED_IP_ADDRESSES associative array declared in .dockrc
+  # Only the last part is there, as the rest of it comes from $DOCK_SUBNET
+  # also defined in .dockrc
+  if [[ -n $DOCK_SUBNET ]]; then
+    ip_addr_last_part="${ASSIGNED_IP_ADDRESSES[$project_name]}"
+    if [[ -z $ip_addr_last_part ]]; then
+      ip_address_option=""
+    fi
+    # And this is where we actually add this option. It'll be left blank if
+    # either $DOCK_SUBNET or $ip_address_last_part are empty.
+    if [[ -n $ip_addr_last_part ]]; then
+      ip_address_option="--ip=$DOCK_SUBNET.$ip_addr_last_part"
+    fi
+  fi
+
+  # Files in both directories are used by "docker" and "root" users and appropriate
+  # symlinks are automatically created with the $host_provided/scripts/symlink_dotfiles script,
+  # upon the container creation. These mount options are hard-coded and are not affected by
+  # the -M flag (which cancels $DEFAULT_MOUNT_OPTIONS). I understand not everyone may want
+  # this setup, escpecially with the dotfiles, so an additional option to prevent
+  # these from being mount will also be added soon.
+  host_mount_source="$DOCK_PATH/guestmounts"
+  guest_mount_target="/usr/local/share/host_provided"
+  mount_options="$mount_options -v $host_mount_source/scripts:$guest_mount_target/scripts:ro "
+  mount_options="$mount_options -v $host_mount_source/dotfiles:$guest_mount_target/dotfiles:ro "
+
+  if [[ -z $do_not_mount_current_dir ]]; then
+    mount_options="$mount_options -v $PWD:/home/docker/main:rw "
+  fi
+
+  # This command both creats AND then starts the container.
+  # Written according to Docker documentation here: https://docs.docker.com/engine/reference/commandline/run/
+  create_cmd="docker run -dit --net=$dock_network --name=$project_name $ip_address_option $privileged $mount_options"
+  #
+  # Strip the line of unnecessary whitespace where we have more than one space or tab separating each option or
+  # positional argument. It's not strictly necessary, but nice for debug mode when we not only print the nice
+  # version, but this one liner too. Extra whitespace generally appears to due empty optional variables,
+  # such as $priviliged, for example - because most variables are surrounded by spaces, so we get 2 spaces instead
+  # of one.
+  create_cmd="$(echo "$create_cmd" | sed 's/\s\s+/ /')"
+
+  # When printing the output to the user about the container-to-be-created, we'd like the docker
+  # command to look readable instead of appearing as a very long one liner. Therefore the following
+  # changes are made and then stored in the $printbl_create_cmd variable:
+  #
+  # 1. Every --long-name-cli-option will be on a new line,
+  #
+  # 2. Same goes for every mount option (starts with -v) as those can be long due to the fact that
+  #    they include two paths - on a host and inside the container.
+  #
+  # 3. Finally, $full_image_name comes last and is also on a new line, slightly shifter to left relative to other
+  #    options. Of course, $full_image_name is also clearly shown in bold green above too, but it's important
+  #    we add it to the printable version too, because of point (4) below. 
+  #
+  # 4. Each new line except for the last one gets an \ charachters, so users can easily copy and past the
+  #    whole command that's printed, paste it, and achieve the same result.
+  #
+  printbl_create_cmd="$(echo "$create_cmd" | sed "s|$HOME|~|g")"
+  printbl_create_cmd="$(echo "$printbl_create_cmd" | sed -E "s/ --/>\n$(ind 8)--/g" | sed -E "s/-v/>\n$(ind 10)-v/g")"
+  printbl_create_cmd="$(echo "$printbl_create_cmd" | tr '>' '\\')"
+  printbl_create_cmd="$(ind 4)$printbl_create_cmd\\ \n$(ind 6)$full_image_name"
+
+  # We're adding $full_image_name here, but not initially only for the sake of readability
+  # of the $printbl_create_cmd value.
+  create_cmd="$create_cmd $full_image_name"
+
+  printf "\nAbout to create a NEW container\nnamed $(color blue)$container_name$(color off) "
+  printf "from image $(color green)$full_image_name$(color off) with the following command:\n\n"
+
+  # If we're in debug mode (invoked either by -d or -y flags to the main ./dock utility,
+  # we print additionaly print the one liner as well.
+  if [[ -n $debug ]]; then
+    echo -e "$(color gray)[DEBUG] ONE-LINER DOCKER COMMAND THAT'S ACTUALLY INVOKED."
+    echo "It should be identical to the one separated by newlines, but with spaces instead"
+    echo -e "$(color gray; color dim)--------------------------------------------------------------------------------"
+    echo -e "$(color off)$create_cmd"
+    echo -e "$(color gray; color dim)--------------------------------------------------------------------------------"
+    echo -e "$(color off)"
+  fi
+  # This is the human-readable and copyable version of the docker command
+  echo -e "$(color gray)$printbl_create_cmd$(color off)\n"
+
+  # In case when we need to create a container,
+  # dry run is invoked HERE, no in the main script because we'd like to print
+  # the actual `docker command` run to be executed (along with the various
+  # variables that are used to determine which image or container
+  # to use (see -d flag, as dry run also implies it).
+  if [[ -n $dry_run ]]; then
+    echo -e "$(ind 4; color yellow) DRY RUN (-y flag used). Exiting without performing any actions.\n"
+    exit
+  fi
+
+  read -p "Please confirm (y/n): "
+  if [[ $REPLY == "y" ]]; then
+
+    echo -e "$(color light_gray)Creating a new container from image $(color green)$full_image_name$(color light_gray)..."
+
+    # Since we're just starting the container, $container_id and $ip_address wan unknown,
+    # but we this information to proceed.
+    container_id=`$create_cmd`
+    container_id=${container_id::12}
+    container_image_name=$full_image_name
+    Container_startup_jobs
+    echo -e "$(color off)CONTAINER CREATED SUCCESSFULLY.$(color light_gray)\n"
+
+  else
+    echo -e "$(color yellow)Okay, will not do anything.$(color off)"
+    exit
+  fi
+
+else
+  if [[ "$container_status" =~ "Up" ]]; then
+    container_was_running=1
+    echo -e "$(color gray)Container $(color blue)$container_name$(color off) already exists and running!"
+  else
+    echo -e "$(color gray)Container already exists, but was stopped. Starting..."
+    docker container start $container_id > /dev/null
+    Container_startup_jobs
+  fi
+  printf "$(color off)"
+  # Actual container image its based on might have changed if `docker commit`
+  # has been command has been performed on the container at some point
+  # without re-creating the said container. So we check for the image name as
+  # and ask container itself to give it to use, as opposed trusting the
+  # THE DECISION TREE used previously. It doesn't affect much, except for
+  # the correct environment variables supplied to the container upon connect
+  # so it can display the correct image name in PROMPT - it's the default
+  # behavior of the default container supplied by `dock` - helps to know
+  # where you are!
+  #
+  # You can customize your PROMPT inside the container to your liking, of course,
+  # but, generally speaking, I found it to be useful to have the image name
+  # displayed in the PROMPT alongside container's name.
+  container_image_name=$(Container_image_name)
+
+fi
+# We need to fetch the ip address, because Container_info() does not
+# provide us with this piece of information. Perhaps it can, but
+# I couldn't figure out how to do it in one go. If it did, then this line
+# can be moved up inside the condition where the container is NOT running.
+#
+# This goes after we call Container_startup_jobs() which does not rely
+# on network connection to the container.
+container_ip_addr=$(Container_ip_address 5)
+if [[ -z $container_ip_addr ]]; then exit 1; fi
+
+# If ip address was found, it means it's runnig, and user wants to automatically connect
+# via ssh (default, negated by providing the -S flag) we can run connection jobs.
+if [[ -z "$do_not_connect_to_ssh" ]]; then
+  Container_connection_jobs
+fi

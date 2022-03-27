@@ -1,0 +1,135 @@
+HOW TO CONTRIBUTE
+-----------------
+There are a number of ways to contribute if you like this project - not just by
+adding code. But let's start with code.
+
+
+  CONTRIBUTING CODE
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  1. Clone the repository and post it to Github/Gitlab or any other place
+     and send me a link with the changes. The contact information is in the
+     ./MAINTAINERS file.
+
+  2. You can also email a patch with the changes attached (git allows to do it,
+     but, oddly enough, I've never tried it).
+
+  3. If you're contributing a lot and we have rapport, I'll probably
+     add you to the Gitea instance or we'll figure out some other way to
+     communicate and exchange code in a simpler manner.
+
+  In each case, your contributions, if accepted, will be acknowledged and
+  credited. However, while you can freely fork this project and do any sorts of
+  wild stuff with it, I will not be merging features I disagree with or code
+  I think is badly written into my repository. Specifically, I think it's
+  important to attention to the code already written, because I will not be
+  not be outlining guidelines - I think anyone who wants to contribute
+  must first get a sense of how the original author writes and structures their
+  code.
+
+  That isn't to say its perfect (especially given that I'm writing it in Bash,
+  which I wasn't even closely familiar with up until this project), but,
+  for instance, Tabs... Yeah, no.
+
+  Please do not be suggesting other languages other than Bash for this project
+  or be reliant on more dependencies. The goal is to reduce them, not grow them
+  just because we want this one small feature that Bash cannot do. Realistically
+  speaking, though, I have not had any issues with Bash scripting capabilities.
+  We can even add unit tests, because, at this point, it's getting a bit scary
+  with every commit and I cannot be re-checking every image with every dock
+  feature on every possible platform.
+
+  A NOTE ABOUT LARGE PULL REQUESTS:
+    To be perfectly honest, in these troubling times and with very limited
+    funding (out of my own pocket), I do not have time to review large
+    pull requests, so something like a bug fix would probably suffice
+    and will even be more appreciated than a large merge request.
+
+  I might add certain users to my Gitea instance later on if there is
+  really some community effort and/or interest around this project.
+  This, I admit, may not happen for a while - in which case I am perfectly happy
+  I have done it anyway, because this tool will keep saving me a lot of time and
+  it will rid me of a lot of unpleasantry in my work on other things. Not to
+  mention how much I've learned thanks to it.
+
+
+  CONTRIBUTING IMAGES
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  As of the time of writing, the only base OS image I'm using dock with
+  is Ubuntu 20.04 amd64 pulled from the Docker Hub and modified accordingly.
+
+  You can the do two therefore do two things:
+
+    1. Use the official dock-compatible image - download or pull it
+       as described in the ./README file and then simply add your changes.
+       After that, you can commit the changes in the container to a new image
+       and publish it. If it's worthy, I will link to it fro the website - be
+       sure to email me in that case. Naming image doesn't really matter,
+       as anyone can always rename it locally. If you publish your image and
+       especially so - if you email me a link to it, be sure to attach a file
+       that can be placed into the ./documentation directory describing
+       details and changes about your particular image.
+
+    2. The second approach is to create an dock-compliant image from scratch,
+       because Ubuntu isn't really what many people may want (even I would
+       prefer to have FreeBSD image and someone else might want Alpine or
+       Arch or whatnot). However, in order to be able to work with the `dock`
+       utilities set, these images must comply in a number of ways. There
+       aren't many things to do to achieve compliance though.
+
+       To understand what requires to be dock-compliant, I suggest you read
+       the ./documentation/IMAGES.txt file, which not only explains
+       the changes made to the original image Ubuntu image, but also outlines
+       what the `dock` utility itself relies upon inside the image.
+       Unfortunately, I don't have the time for an extended guide.
+
+
+  IMPLEMENTING SUPPORT FOR OTHER ENGINES
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  If you're intimately familiar with any other container engine and you would
+  like to add support for it into the "dock toolset" - feel free to email me.
+  However, unless there's funding, you'd probably have to write the code yourself
+  and then again, I might not have the time to review. Which shouldn't stop you -
+  it's not like this site and repository is the single true source.
+
+  I just think it'd be nice if efforts are concerted and codebase is more or less
+  unified with with similar style, structure and even goals.
+
+
+  CONTRIBUTING FUNDS
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  Something that I and many other people would appreciate immensely.
+  Please the ./DONATE file for more details. Your donations will not only
+  help this project, but ordinary people who have nothing to do with programming.
+  In other words, part of the received funds will be contributed for good
+  causes.
+
+
+  CONTRIBUTING BY SPREADING THE WORD
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  If you find this project interesting, but you can't help with code or funding,
+  please talk about it. Say something like "this helped me do this" or
+  introduce your co-workers to it. This may have a greater effect, but,
+  as I mentioned before, I started writing this not for money or attention or
+  any to "play" with cool new language (Bash, really?). It's because I needed it.
+  Which after 1.5 years made me realize I need to prepare it for the release, as
+  other people may find it useful as well.
+
+
+WHY IS IT NOT ON GITHUB?
+------------------------
+
+I currently don't want to open any registrations for the Gitea instance
+this project's code hosted on, as I'm not sure how to do it right without
+getting spammed. I also don't want to be putting this on Github or Gitlab -
+not because I dislike those companies, but simply because I feel like we
+must step up a bit and make the move towards the direction where our code,
+our communications and everything else that we do on the internet is not
+so centralized.
+
+Complete decentralization (or promises of it) are absurd, but there is a
+middle way. It isn't designed. It isn't envisioned. It's a discovery we all
+have to attempt to make. Even if just the three out of billions of stars align
+for us in the night sky, we'll get far enough to create better things.
+
+I also want to try and use Fossil as the primary version control system,
+so starting with Github/Gitlab may didn't even make sense to me.

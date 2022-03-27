@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+source $HOME/.dockrc
+ignored_prefix_path=$(echo "${IGNORED_PREFIX_PATH%/}" | sed "s|^~|$HOME|" | sed 's/\/home\/[a-zA-Z0-9\-_.]\+\///')
+
+# The script receives either a container name or a directory path
+# as its only argument in $1. If it contains slashes, it's a path
+# With `dock`, container names shall not contain slashes, only dots.
+if [[ "$1" == *"/"* ]]; then
+  project_name=$(echo "$1" | \
+    sed 's|/home/[a-zA-Z0-9\-_.]\+||' | \
+    sed "s|$ignored_prefix_path/||" | tr "/" ".")
+  project_name=$(tr '.' $'\n' <<< $project_name | tac | paste -s -d '.')
+  project_name=${project_name%.}
+
+  # We print container_name knowing full well that we received a path and not
+  # a container name, which means this variable in the main ./dock script is empty
+  # and we need to fill it.
+  #echo "container_name=$project_name"
+
+# If $1 contains no slashes, it is definitely a container name.
+else
+  project_name="$1"
+fi
+
+# Either way, we need $project_base_name be derived from the $project_name,
+# no matter where it came from. $project_name may contain dots and $project_base_name
+# shall not.
+project_base_name="$(echo $project_name | sed -E 's/^([^.]+)\..*$/\1/')"
+echo "project_name=$project_name"
+echo "project_base_name=$project_base_name"

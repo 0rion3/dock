@@ -1,0 +1,29 @@
+DONATIONS
+---------
+
+This project can do a lot of good - it already has done so, beyond what
+I myself expected even. It saved me so much time over the past 1.5 years.
+But apart from that, I would like to send a large portion of funds donated
+to good causes, to people in dire need of help right now. If you're reading
+this in plain text, please visit https://dock.orion3.space/donate.html for
+a more detailed info on what the donations are going to be used for.
+
+Bitcoin [1][2] address for donations:
+
+    bc1qdlmcllxhdydt8ghnf0nhwz78n4c8lutncxhdfu
+
+If you donate, feel free to email and request a feature, a bug fix or anything
+else related. I can't guarantee it, but since I've been working on this software
+and using it myself for over a year I do think there must be people like myself
+out there, who would find this tool immensely helpful. It's not going to
+suddenly stop working - especially because it's just Bash scripts. So every
+feature or bugfix added stays there for years to come without much need for
+maintenance.
+
+  [1] Other crypto-currencies are accepted as well. Please email me and ask.
+      See CONTACTING section for details.
+
+  [2] Unfortunately, with the current situation in the world, it's becoming
+      increasingly more difficult to receive donations via traditional
+      payment systems, but feel free to email and discuss it. A bank transfer
+      to a bank in a  neutral jurisdiction is theoritically possible too.

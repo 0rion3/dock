@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+source $HOME/.dockrc
+source $BASHJAZZ_PATH/utils/colors.sh
+source $BASHJAZZ_PATH/utils/split_string.sh
+source $DOCK_PATH/lib/container.sh
+source $DOCK_PATH/lib/terminal_theme.sh
+connection_task=${1:-connect}
+
+find $HOME/.ssh/ -name "dock_config_*" -type f -mmin +1 -delete
+
+# This is a temporary entry to be replaced as soon you're trying to connect to another
+# container with another ip_address
+ssh_suffix=$(date +"%T.%N" | sed 's/[^0-9]//g')
+echo "Host dock0-guest"                         >  ~/.ssh/dock_config_$ssh_suffix
+echo "HostName $container_ip_addr"              >> ~/.ssh/dock_config_$ssh_suffix
+echo "StrictHostKeyChecking no"                 >> ~/.ssh/dock_config_$ssh_suffix
+echo "StrictHostKeyChecking no"                 >> ~/.ssh/dock_config_$ssh_suffix
+echo "UserKnownHostsFile /dev/null"             >> ~/.ssh/dock_config_$ssh_suffix
+echo "LogLevel ERROR"                           >> ~/.ssh/dock_config_$ssh_suffix
+echo "IdentityFile ~/.ssh/${dock_network}_host" >> ~/.ssh/dock_config_$ssh_suffix
+
+if [[ -n $debug ]]; then
+  source $DOCK_PATH/lib/debug.sh ssh dock_config_$ssh_suffix
+fi
+
+ssh_username=${ssh_username:-docker}
+echo -en "$(color light_gray;)Connecting to the container via ssh, "
+echo -e  "$(color light_blue)$ssh_username@$(color green)$container_ip_addr$(color off)\n"
+
+# Before we connect, we'll do two things:
+
+# 1. Run "~/dock_bin/connection_jobs" on the docker guest if the file exists.
+#     The `connection_jobs` scripts differs from the `startup_jobs` in that
+#     the latter only runs when container was stopped and then restarted or when it is created,
+#     whereas the former is invoked every time you connect, regardless of whether the container
+#     has just been started or was running before.
+#
+# 2. Run a script that displays a welcome message banner. The script is located and run from the
+#    the host machine, however it sources the `~/dock_bin/welcome_message.sh` if such file
+#    exists (it does on all dock-maintainer provided images). That file contains image specific
+#    information which may be useful to the user. You may remove it at your own will.
+ssh $ssh_username@dock0-guest -F ~/.ssh/dock_config_$ssh_suffix \
+  'bash -l -c "test -f ~/dock_bin/connection_jobs && ~/dock_bin/connection_jobs"'
+
+TerminalTheme_change_to_container_theme
+source $DOCK_PATH/hostscripts/dock_welcome_message.sh
+
+# Only change dir to /home/docker/main if it's mounted
+pwd_mounted="$(docker inspect -f '{{ .Mounts }}' "$container_name" | grep '/home/docker/main')"
+if [[ $ssh_username == "docker" ]] && [[ -n "$pwd_mounted" ]]; then
+  cd_to_main='cd ~/main;';
+fi
+
+image_suffix="$(echo $container_image_name | sed -r 's/.*\/([a-zA-Z0-9._\-]+):.*/\1/')"
+
+ssh $ssh_username@dock0-guest -F ~/.ssh/dock_config_$ssh_suffix \
+  -t "$cd_to_main
+  export DOCKER_PROJECT_NAME=\"$project_name\"; \
+  export DOCKER_PROJECT_BASE_NAME=\"$project_base_name\"; \
+  export DOCKER_IMAGE=$container_image_name; \
+  export DOCKER_HOST_FONTAWESOME_INSTALLED="$(fc-list : family | uniq | grep FontAwesome)"; \
+  export DOCKER_IMAGE_SUFFIX="$image_suffix"; zsh --login"
+
+TerminalTheme_revert_to_original

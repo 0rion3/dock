@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Paths to libraries may change, env variables names may change.
+# But some parts of container must always be there, even though they
+# may actually be part of another set of script or repository. In this case -
+# it's BASHJAZZ's script.
+
+# And so, to avoid code duplication, but to keep this as part of the container's
+# immutable constant and reliable part, we're going to call the $BASHJAZZ's script from here,
+# passing it all of the same argument (actually, just one positional argument)
+# that this script receives.
+
+# This comment for a file with just one line of code is here because it'll serve
+# as a reminder (for a while) that things need to improved with regards to what are
+# the immutable paths and to handle things without code duplication.
+
+source $HOME/.shared_shell_profile
+$BASHJAZZ_PATH/utils/base64_exec $1

@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+#
+# When using containers, people inevitably leave pieces of private or
+# semi-private information.  This script is intended to clean it all out
+# (without connecting by ssh). Currently, this list includes:
+#
+#  1. Various logs, including syslog
+#  2. Public keys in ~/authorized_keys
+#  3. Various history files in the $HOME folder of each user, such
+#     .bash_history, .zsh_history, .viminfo etc.
+#  4. Script currently lists two users for which it attempts to find files and directories to delete:
+#     The users are "root" and "docker" and each user's home directory is prepended before the each
+#     array item listed in $user_files or $user_dirs arrays.
+#
+# If you want to distribute your image, you would want to remove this
+# identifying information along with the log files and things that increase
+# the size of the container.
+#
+# The script makes a very clear distinction and creates separate variables
+# for files and directories. This is because we don't want anyone editing this file
+# add something as a file whereas in fact it's a directory full of necessary files
+# which aren't supposed to be deleted
+#
+# If `*` wildcard is used in file or directory path at the end, it'll behave just like it would
+# with the `rm -rf` command, so the directory itself won't be removed, only directories inside it will.
+# The only thing is that we'd additional code is necessary to print out and remove the files that
+# are about to be deleted using that wildcard.
+#
+#
+# For DIRECTORIES:
+#   Cleaning is done with by invoking `rm -rf`, so be careful. It doesn't ask
+#   questions, just follows your demands, but it will prompt you if you want to proceed.
+#   Perhaps clone, export or commit the container to another image before you
+#   clean up something you cannot recover.
+#
+# !NOT IMPLEMENTED:
+# ---------------
+# You may also optionally specify your own paths as arguments following the first one
+# which is a full container name. Example:
+#
+#   ./cleanup_container service1.project_name.Work /tmp/*
+
+source $HOME/.dockrc
+source $BASHJAZZ_PATH/utils/formatting.sh
+source $DOCK_PATH/lib/container.sh
+
+container_name="${1:-$container_name}"
+
+# TODO: allow cleaning up of custom paths
+# TODO: allow cli flags to skip all or some of the hard-coded paths
+#         This code below will come in handy as it removes the first argument from the argument array
+#           set -- "${@:2}"
+
+# Both $user_files and $user_dirs paths will be prepended with each user's $HOME path,
+# even if the path starts with a forward slash `/` or `./` or `~/` - it won't matter, so don't be
+# using those, as they will either result in files not being found of, in case of a double forward
+# slash - your additional slash will be a useless waste of byte.
+
+user_files=(
+  ".bash_history"
+  ".bash_login"
+  ".zsh_history"
+  ".zcompdump*"
+  ".viminfo"
+  ".bash_history"
+  ".bash_login"
+  ".zsh_history"
+  ".zcompdump*"
+  ".ssh/authorized_keys"
+  ".cache"
+  ".viminfo"
+)
+user_dirs=(
+  ".cache"
+  ".zsh/cache"
+)
+
+# $global_files and $global_dirs must start with a forward slash indicating absolute path.
+# The ones that don't will be removed.
+global_files=(
+  "/tmp/*"
+)
+global_dirs=(
+  "/var/log/*"
+  "/tmp/*"
+)
+
+color_red=$(color red; ind 4)
+color_off=$(color off)
+color_dim=$(color dim; ind 4)
+
+FILES_TO_REMOVE=()
+DIRS_TO_REMOVE=()
+PACKAGE_CACHE_DIRS="$(Container_package_cache_paths)"
+USER_HOME_PATHS=( "/root" "/home/docker" )
+
+# Prepend user paths with the path of their respective $HOME directories
+for home_path in "${USER_HOME_PATHS[@]}"; do
+  for f in "${user_files[@]}"; do
+    FILES_TO_REMOVE+=( $home_path/$f )
+  done
+  for f in "${user_dirs[@]}"; do
+    DIRS_TO_REMOVE+=( $home_path/$f )
+  done
+done
+
+# Global directories can be just merged into the existing array
+FILES_TO_REMOVE=( "${FILES_TO_REMOVE[@]}" "${global_files[@]}"                           )
+DIRS_TO_REMOVE=(  "${DIRS_TO_REMOVE[@]}"  "${global_dirs[@]}" )
+
+echo -e  "\n*********************************************************************************************"
+echo -e "Below is a list of files and directories to be removed from '$container_name' filesystem."
+echo -e "Some may not exists, but $(color off; color bgrnd_red;)the existing ones will be DELETED:$(color off)"
+echo -e "********************************************************************************************\n"
+
+echo -e "$(ind 2; color magenta)FILES:$(color dim)"
+for file in "${FILES_TO_REMOVE[@]}"; do
+  echo -e  "$(ind 4)$file"
+done
+
+echo -e "$(ind 2; color yellow)DIRECTORIES:$(color dim)"
+for dir in "${DIRS_TO_REMOVE[@]}"; do
+  echo -e  "$(ind 4)$dir"
+done
+
+echo -e "$(ind 2; color blue; color dim)PACKAGE CACHE DIRECTORIES:$(color dim)"
+echo -e "$(ind 4)$(echo "$PACKAGE_CACHE_DIRS" | sed "s/ \//\n$(ind 4)\//g")"
+
+printf "\n$(color off)Carefully check the list of files and directories above and confirm that
+you indeed want them deleted. Please type (yes/no): "
+
+read confirmation
+
+if [[ "$confirmation" == "yes" ]]; then
+  echo -e "\n$(color bold)Starting the cleaning process...$(color off)"
+  for f in "${FILES_TO_REMOVE[@]}"; do
+    Container_rm_path "$f" "FILE"
+  done
+  for d in "${DIRS_TO_REMOVE[@]}"; do
+    Container_rm_path "$d" "DIR"
+  done
+
+  printf "$(color dim; ind 4)Running $(color red)apt-get clean$(color off)$(color dim) on container..."
+  Container_exec 'apt-get clean' && echo -e " DONE" || exit 1
+
+  printf "\n$(color green)Successfully cleaned up the container $(color bold)$container_name.$(color off)\n"
+  printf "Enter an image name to commit the changes in this container to\n"
+  printf "and press ENTER (if empty, will skip): $(color blue; color bold)"
+  read image_name_to_commit_changes_to
+  printf "$(color off)"
+  if [[ -n "$image_name_to_commit_changes_to" ]]; then
+    image_sha="$(docker commit $container_name $image_name_to_commit_changes_to)"
+    if [[ $image_sha == *"sha256:"* ]]; then
+      image_sha=$(echo "$image_sha" | sed -r 's/^sha256:(.{12}).*/\1/')
+      format='id: {{.ID}},full_name: {{.Repository}}:{{.Tag}},size: {{.Size}},created: {{.CreatedSince}}'
+      printf "\n$(color green; ind 4)"
+      docker images --format "$format" | grep $image_sha | sed "s/,/\n$(ind 4)/g"
+    fi
+  else
+    echo -e "$(color dim)No changes to any of the images were made.$(color off)"
+  fi
+  printf "$(color off)\n"
+  exit 0
+else
+  echo -e "\nAborting, you didn't type 'yes'.\n"
+  exit 1
+fi

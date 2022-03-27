@@ -1,0 +1,639 @@
+DOCK - Pain-free Containers
+---------------------------
+
+"dock" is an alternative way to use Docker (and very soon other container
+engines) without writing config files: cd into a dir, type `$ dock` and you're
+inside new or existing container with the directory mounted into it by default.
+
+  This toolset isn't forcing anyone else on the team to use itself or even Docker.
+
+  It is written in Bash entirely and has minimum requirements.
+  While currently intended for Desktop use by developers, the hope is to
+  eventually allow it to be easily used as part of a deployment process and
+  production environments. To summarize the whole point of using it:
+
+  With "dock" you can easily:
+
+    * Create a container and mount any directory into it - or multiple
+      directories - with just single command: `$ dock`. It rarely requires
+      any additional arguments on a day-to-day usage (that's from 1,5 years
+      of the experience of using it myself).
+
+    * Automatically connect to the container via ssh (or other means later).
+      If you just created the container, it will also do this step
+      automatically.
+
+    * Have beautifully set up environment with zsh shell and Vim waiting
+      for you inside the default image based on Ubuntu 20.04.
+      You can, of course, customize it and install any shell, text editor and
+      other software. See the INSTALLATION section to download the image.
+
+    * Create images with environments specifically
+      designed for your projects, which is what containers are for. At the
+      same time may you forget about Dockerfiles - not needed anymore.
+      "dock" was created with the idea that Dockerfiles shall not be used.
+
+      INCREMENTAL IMAGE UPDATES section in .documentation/IMAGES.txt
+      explains the reasoning and expands on that topic.
+
+Others wouldn't even need to know you're using this tool, let alone
+familiarize themselves with Docker or "dock". It is designed to
+be "exceptionally optional" and "personally useful".
+
+There are also a few more non-default images you might find useful in
+your daily sessions as a developer, such as the ones that provide
+VPN and TOR functionality.
+
+Please also kindly read ./CONTRIBUTE, ./MAINTAINERS, ./DONATE, and ./LICENCE
+for more information. I believe that this software may be useful to people who 
+aren't software engineers, but who know their way around command line -
+a least a little bit and so it'd would be great if we could continue this work.
+
+SHORT VIDEO DEMO
+----------------
+  There are a few videos you might want to see, if that's how you learn.
+  They are not narrated, and are perfectly watchable and self-explanatory.
+
+    * INSTALLATION
+      https://dock.orion3.space/screencasts/dock_install.mp4
+
+    * USAGE
+      https://dock.orion3.space/screencasts/dock_install.mp4
+
+
+GOALS (or why?)
+---------------
+
+   GOAL 1: NO Dockerfiles or learning new DSL, or programming language, or some
+           other convoluted configuration options. Or even NO understanding
+           how Docker itself works. This tool is eventually intended to be
+           used with different containerization tools.
+
+   GOAL 2: ease of use of `dock` itself (less cli-options or configuration).
+
+   GOAL 3: make code reasonably uncomplicated, while acknowledging the
+           ambiguity - which is necessary to achieve GOAL (2) - managing
+           it with as little complexity in code as possible.
+
+   GOAL 4: Make it last. Even if not a single line of code is added after
+           the official release, it will be useful for years to come. It's
+           all POSIX-compliant and written in Bash, so not much can break.
+           The only serious dependency is Docker, but even that one can be
+           disregarded when GOAL 5 is achieved.
+
+   GOAL 5: (not implemented)
+           make this tool work with different container engines in such
+           a way, that the cli stays the same for the end user.
+           Support for engines likely to be added first: BSD jails & Podman.
+
+           Right now Docker-specific code is not very well isolated and
+           rather scattered among various files, but there isn't too many calls
+           to various docker commands, so, hopefully, it'll be easy to identify
+           and separate them.
+
+INSTALLATION
+------------
+
+  DEPENDENCIES
+  ––––––––––––
+  bash >= 4.2, git, sed, awk, ssh, docker
+
+  SOFT DEPENDENCIES
+  –––––––––––––––––
+
+    * Tilix terminal (try, it's very cool).
+        If you're using Tilix, containers will be properly highlighted
+        when you connect to them. Other terminal have different escape
+        codes for that and I haven't adjusted for them all just yet. See
+        https://gnunn1.github.io/tilix-web/
+
+    * font-awesome
+        if you don't have it, it's no problem - nice icons inside the
+        container PROMPT when you connect will be replaced with less nice icons,
+        that's all. But remember, "font-awesome" needs to be installed on your
+        host machine, not inside the container.
+
+  STEPS TO INSTALL
+  ––––––––––––––––
+
+    1. GET THE `dock` UTILITIES SET
+    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+    Download the archive [1] with the stable version
+    of the `dock` utilities set, which includes all submodules, 
+    but no git-related files or other unnecessary artifacts:
+
+        $ curl https://dock.orion3.space/releases/dock_stable.tgz \
+            -o dock_stable.tgz && tar xvzf dock_stable.tgz && rm dock_stable.tgz
+
+    OR
+
+    Clone the git repository, and place it anywhere on your file system,
+    then initialize and update all git submodules in it:
+
+        $ git clone https://gitea.orion3.space/DOCK/dock.git && cd dock && \
+            git submodule init && git submodule update
+
+
+    2. RUN THE INSTALLER SCRIPT
+    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+    Navigate to the directory with project's source code you've just obtained
+    and run this command:
+
+        $ ./install
+
+    It'll ask you a few questions, but it's very simple. You won't need
+    to edit any configuration files manually, if everything goes right. Among
+    other things, the script will download the default image for your either
+    directly from the official website or will offer you a magnet link [2].
+    Please consider downloading it via BitTorrent and seeding. You can then
+    tell the script the downloaded image filename to use (it'll ask).
+
+      NOTE:
+        You may not be able to run this default image under MacOSX, although
+        `dock` scripts themselves are fully compatible. The problem is that
+        MacOSX is not running on a amd64 architecture. I don't use MacOSX,
+        nor intend to, but I'd like this to software to work there too. As
+        far as I'm concerned, Docker has a tool called buildx [4] to help
+        convert the images. If you're on MacOSX and can help me do it, I'll
+        happily publish the converted base image of Ubuntu 20.04 that would
+        run on MacOSX.
+
+  You should now be able to run the `dock` command from anywhere. 
+  Try it with the `dock -y` flag (dry run), which will print all the
+  variables and other debug information about creating or starting/connecting
+  to a container with relation to your current directory.
+
+
+    [1] https://dock.orion3.space/releases/dock_stable.tgz
+
+    [2] magnet:?xt=urn:btih:2959a451c91d1c298556839e30c42bed8416fe1c&dn=dock%5Fubuntu20%5F240322%5FSQ.tgz&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969
+
+    [3] While everyone hates `tar`, because it's impossible to remember
+        the correct cli-options to it (see XKCD: https://xkcd.com/1168/)
+        the download archive includes a utility called `untar`, which does
+        the job for you. Ironically, it's trapped inside that very same
+        archive it could've extracted.
+
+        But, on a more serious note, this tiny `untar` script is part
+        of a set of libraries under ./vendor/bashjazz which I strongly
+        recommend you explore. They are small to medium sized bash-scripts
+        (some executable, some source-able, some both) helping you in
+        everyday life (you can use zsh, or any other shell, of course -
+        they just require bash installed).
+
+    [4] https://docs.docker.com/buildx/working-with-buildx/
+
+
+BASIC USAGE
+-----------
+
+Unambiguous:
+
+   $ dock [IMAGE_NAME] [CONTAINER_NAME]
+
+Here, with just one positional argument provided,
+`dock` will be doing some guessing:
+
+    $ dock [IMAGE_NAME]
+    $ dock [CONTAINER_NAME]
+
+And, finally, without any positional arguments `dock` will be basing
+its guessing on default image you set in ~/.dockrc and your current directory:
+
+    $ dock
+
+Both positional arguments are optional, however they're not exactly
+positional. If the second one isn't provided, `dock` tries its best to guess
+what's going on. The simplified version looks like this when only the first
+argument is supplied:
+
+  a. Assume $1 (first argument to `dock`) is the name of an existing CONTAINER.
+     If it exists, launch it and connect via ssh.
+
+  b. If container cannot be found, assume it's an image name.
+
+  c. If NO image is found, use the default one defined in ~/.dockrc
+     to create a new container.
+
+Go trough the EXAMPLES section as it shows pretty much all possible
+ways in which `dock` can be in invoked to create or start a container.
+
+For a detailed overview of the "guessing" process with all two, only one or
+none of the positional arguments provided in the ./documentation/DECISION_TREE
+file it's actually quite intuitive in terms of usage and the elaborate
+explanation is intended for those who read and/or contribute code to this
+project.
+
+
+COMMON WORKFLOW
+---------------
+
+  1. Navigate to the target directory you want mounted inside your container -
+     let us suppose it's called `~/dev/my/new/project` - this is the directory
+     will be mounted as /home/docker/main inside the container by default.
+     It's also the directory you'll automatically cd into when you connect
+     to the container.
+
+  2. Type `dock somerepo/img_name:stable`
+
+  3. See your terminal displaying what it's about to do when calling `docker run`
+     and asking for the confirmation (y/n).
+
+  4. Type "y" and press ENTER, then see yourself connected to the newly
+     created container via ssh (no additional configuration is necessary)
+     as user "docker".
+
+     EXPLORE INSIDE THE CONTAINER
+     ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+     Once you're connected you can:
+
+       * Type `pwd` and you'll see you're inside /home/docker/main directory
+       into which the current directory on your host machine is mounted in
+       read+write mode.
+
+       * If you had used '-u root' option with `dock` when creating,
+         starting or connecting to the container, you'll found yourself in the
+         /root dir of the container. The "root" user doesn't have a ~/main 
+         directory - it's only the "docker" user's $HOME/main is where
+         `dock` would mount current host directory.
+
+       * If you had used `dock -u root` option when creating, starting or
+         connecting, you will found yourself in the /root dir of the container.
+         The "root" user doesn't have ~/main directory either way.
+
+  5. Type "exit" - you guessed it, to exit the container.
+
+  6. If you're in the same directory, type `dock` (without any arguments at all)
+     to reconnect to the same running container or start and connect to
+     the stopped one named "project.new.my".
+
+  7. If you're in a different directory, type `dock project.new.my` to connect.
+
+  NOTE:
+    container names DON'T HAVE to contain dots (.) - they only do because
+    the names are auto-assigned from the target directory path upon
+    creation of the container. But you could easily create a container
+    with a simple name, mounting current directory inside of it:
+
+     $ dock dock/ubuntu20:stable newapp
+
+  You can then connect to it from anywhere by simply typing:
+
+     $ dock newapp
+
+
+EXAMPLES
+--------
+(––> is used her to mark the most important lines/commands)
+
+  (WITH NO CONTAINERS THAT CAN BE MATCHED)
+
+  Example 1 (no arguments)
+  ––––––––––––––––––––––––
+      $ docker ps -a | grep 'project1'
+        # => NO OUTPUT, container doesn't exist
+      $ cd ~/dev/pets/project1
+  ––> $ dock
+
+      # RESULT: a new container is created with the name "project1.pets"
+      #         based on the image defined as the default one in ~/.dockrc
+      #         which currently is "dock/ubuntu20:stable"
+
+  Example 2 (one positional argument given, dock assumes it's an image name)
+  ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+      $ docker ps -a | grep 'project1'
+        # => NO OUTPUT, container doesn't exist
+      $ cd ~/dev/pets/project1
+  ––> $ dock dock/ruby3:stable
+
+      # RESULT: a new container is created with the name "project1.pets"
+      #         based on the dock/ruby3:stable image (it must exist).
+
+  Example 3 (both positional arguments are provided)
+  ––––––––––––––––––––––––––––––––––––––––––––––––––
+      $ docker ps -a | grep 'project1'
+        # => NO OUTPUT, container doesn't exist
+      $ cd ~/dev/pets/project1
+  ––> $ dock dock/ruby3:stable project1
+
+      # RESULT: a new container is created with the name "project1.pets"
+      #         based on the dock/ruby3:stable image (it must exist).
+      #         The ".pets" part is stripped because an explicit second
+      #         argument was provided, relieving the script of any ambiguity.
+
+
+  (WITH EXISTING CONTAINERS, THAT MIGHT OR MIGHT NOT HAVE BEEN MATCHED)
+
+  Example 4 (no arguments)
+  ––––––––––––––––––––––––
+      $ docker ps -a | grep 'project1'
+        # => outputs info about container named 'project1', it exists
+      $ cd ~/dev/pets/project1
+  ––> $ dock
+
+      # RESULT: we're instantly connected to the container named 'project1.pets'
+
+  Example 5 (one positional argument given, dock assumes it's a container name)
+  –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+      $ docker ps -a | grep 'project2'
+        # => NO OUTPUT, container doesn't exist, notice the "2" instead of "1"
+      $ cd ~/dev/pets/project1
+  ––> $ dock project2
+
+      # RESULT: a new container is created with the name "project2"
+      #         based on the image defined as the default one in ~/.dockrc
+      #         which currently is "dock/ubuntu20:stable". That's
+      #         because `dock` thinks you want a container based on a different
+      #         image, but with the same "project1" directory mounted into it.
+
+  Example 6 (one positional argument given, dock assumes it's an image name)
+  ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+      $ docker ps -a | grep 'project1'
+        # => outputs info about container named 'project1', it exists
+      $ cd ~/dev/pets/project1
+  ––> $ dock dock/python3.8:stable
+
+      # RESULTS IN ERROR: Docker will not allow to create two containers
+      #                   with the same name, which in this case is derived
+      #                   from the current directory name.
+
+  Example 7 (one positional argument given, dock assumes it's a container name)
+  –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+      $ docker ps -a | grep 'project1' | grep ruby3
+        # => outputs info about container named 'project1', it exists
+        #
+        # We're not going to `cd` into the associated directory and yet...
+  ––> $ dock project1
+
+      # RESULT: we're instantly connected to the container named 'project1',
+                because `dock` found a matching container, but not an image.
+
+  Example 8 (one positional argument given, no image or container found)
+  ––––––––––––––––––––––––––––––––––––––––––––––––––––––––--------------
+      $ docker ps -a | grep 'projectABC' | grep ruby4
+        # => NO OUTPUT, nor container neither image exist
+  ––> $ dock projectABC
+  ––> $ dock ruby4
+
+      # RESULTS IN ERROR: if you only provide one argument, the default image
+      #                   will not be used to create a new container. It's a
+      #                   fine assumption - we can go ambiguous all the way.
+
+  Example 9 (both positional arguments are provided)
+  ––––––––––––––––––––––––––––––––––––––––––––––––––
+      $ docker ps -a | grep 'project1' | grep ruby3
+        # => outputs info about container named 'project1', it exists
+        #
+        # We're not going to `cd` into the associated directory and yet...
+  ––> $ dock dock/ruby3:stable project1
+
+      # RESULT: we're instantly connected to the container named 'project1'
+      #
+      # THIS EXAMPLE IS RARE:
+      #   ...and the result is exactly the same as in Example 7, so why bother?
+      #   You hardly want to check that a certain container is based on
+      #   on a certain image. Docker wouldn't let you create two containers
+      #   that are named the same. Still, the check for the image name
+      #   upon which the container is based is performed, so if it was
+      #   a different image, it would result in an error.
+
+
+HOW THE MAGIC WORKS
+-------------------
+What makes `dock` awesome is that you don't have to type container names or
+image names every time, if ever. The information to make the decision is
+supplied by other helper scripts and variables (you may have guessed that
+from the EXAMPLES section already). The implementation of this process -
+the decision making process - while slightly complex (because of positional
+parameters ambiguity) improves easy of use by the end user. As in any good
+program, there are some ugly parts hidden in corners, that, like corruption
+in general, help the wheels rolling.
+
+Presented here, is the simplified version of what `dock` does under the
+hood. If you'd like to get familiarized with the details, lease refer to
+the ./documentation/DECISION_TREE.txt file.
+
+  POSSIBLE ACTIONS or OUTCOMES
+  ––––––––––––––––––––––––––––
+  There are only four outcomes of the decision making process made
+  by the script and we'll just abbreviate them with simple words:
+
+  CONNECT
+     Connect via ssh to the picked container (or possible other ways later)
+  START
+     Start the picked container when it's stopped, then perform,
+     then perform action CONNECT.
+  CREATE
+     Create a new container based on an certain picked image name and assign
+     it a name, then perform actions START and CONNECT.
+  ERROR
+     Do not proceed and exit the program with code 1.
+     This action will not invoke any other actions.
+
+  These are not function names, nor can you easily identify them in the code
+  (yet - because, well, Bash!), but it's good to have some structure in mind
+  when you think about the code.
+
+  At the moment, there's no option to instruct the `dock` script to
+  invoke the "CREATE" without invoking "START". You can, however, choose not to
+  automatically connect to the started container if you provide the `-S` flag to
+  the `dock` command (which means "do not connect after start). Thus, you may end
+  with the outcomes when you run `dock` command:
+
+        (CREATE, START, CONNECT) or
+        (CREATE, START)          or
+        (START, CONNECT)         or
+        (CONNECT)                or
+        (ERROR)
+
+And that's what the decision is all about: do we start a new container
+because we can't really find any matching existing container or did the
+user actually meant that they wanted to create a new one? As there's no
+database to keep track of that (I don't think there should be another layer of
+configuration/data for containers). Therefore, some amount of non-trivial code
+in Bash is necessary to implement the decision tree, which is presented below.
+
+  I went through multiple iterations of rewriting the implementation of the
+  decision tree as well as documentation for everything. The goals I stated -
+  simplicity of both usage and understanding of the code must be of help in
+  the future. While it'd be easier to program something where each positional
+  parameter could only mean one thing - and it would simplify the code and
+  understanding of it - it also WOULD RID the program of its crucial feature,
+  namely the usecase where users would only want to type four letters - `dock`
+  - and be connected to the correct (expected by the user) container instantly.
+
+If you'd like to see an elaborated text scheme representation of the decision
+process, please refer to the ./documentation/DECISION_TREE.txt file.
+
+
+IMPLICIT CONTAINER NAMING
+-------------------------
+When `dock` creates a new container, this container's name often isn't
+explicitly provided by the user typing the `dock` command - it only happens
+in case (2.2) of the "decision tree" - see ./documentation/DECISION TREE.
+In all other cases current directory path is used to construct a name for
+the new container.
+
+  NOTE:
+    before container is created, you will be shown all the information related to
+    it, including the image, container name, which directories are to be mounted 
+    inside the container etc. Yo will then be asked to confirm with (y/n).
+    A new container is NEVER created unless you confirm by typing "y" end
+    pressing Enter.
+
+Whenever container name cannot be assumed from the cli-arguments provided by
+the user, the path is used and the following changes are applied:
+
+  1. IGNORED_PREFIX_PATH is stripped from the current path if it's
+     defined in ~/.dockrc. The default is for it to be set to ~/dev.
+
+       It's useful, because sometimes the path may be too long and you may
+       not want your container name to be long (even though you can manually
+       provide a name for it). Another reason is that if you keep all your
+       work in ~/dev, there's no reason for all of your containers to have a
+       ".dev" in their names. But you may think otherwise, so presume away
+       and simply comment out the IGNORED_PREFIX_PATH line in ~/.dockrc
+
+  2. All slashes "/" are replaced with dots "."
+
+  3. Then what's remained is reversed
+
+
+INSIDE A CONTAINER
+------------------
+Please read ./documentation/IMAGES.txt to find out more about how
+dock-compatible images/containers work, what's required of them to remain
+compatible and many more.
+
+One important piece of information that probably is too small and simple
+not to repeat here is the next section...
+
+
+LAUNCHING SERVICES
+------------------
+Since `dock` is all about avoiding Dockerfiles, it's hard to use the init.d
+or systemd to launch services. But there's there's another way to do it,
+which, if you think about it, can be standardized when `dock` adds support
+for other container engines.
+
+Have your /etc/init.d/* script ready (it usually would be installed along
+with the package) and simply add the `service start ...` command to the
+/root/startup_jobs on the guest:
+
+    # inside the container
+    $ echo 'service nginx start' >> /root/dock_bin/startup_jobs
+
+
+CLI OPTIONS
+-----------
+`dock` provides a number of options with regards to mounting/non-mounting
+directories as well as giving privileged access to the container:
+
+    -u [USER]
+      ssh username to use when calling connecting to the container via ssh.
+      Defaults to "docker", but sometimes you'd need "root", for example.
+      However, you're better off using an alias:
+
+        alias dock-r="dock -u root"
+
+    -v [PATH_ON_HOST:PATH_ON_GUEST[:ro]]
+        Mounts additional directories into the Docker container. Format is the
+        same as in Docker, consult Docker manual:
+        https://docs.docker.com/storage/bind-mounts/
+
+    -t [OPTIONS]
+      Defines some ssh connection options. Currently there's just one, which
+      is the theme for the terminal to be set.
+
+        ATTENTION:
+          works ONLY in "Tilix" terminal for now, because that's what I use.
+          and I have not tested it in other Terminals
+          https://gnunn1.github.io/tilix-web/
+
+    -p
+      Run docker container with the --privileged flag. More info can be found
+      here: https://www.redhat.com/sysadmin/privileged-flag-container-engines
+      It helps with setting up Wireguard in particular.
+
+    -n
+      Create new container regardless of whether there's already a container
+      with the provided name.  This is only marginally useful.
+
+    -M
+      DO NOT mount whatever is specified in the $DEFAULT_MOUNT_OPTIONS.
+      Current directory would still be mounted, so use -H to prevent mounting
+      it.
+
+    -H
+      By default, current directory from which the `dock` script is launched
+      will be mounted to ~/main inside the container. This option prevents this
+      this behavior, but keeps all the other default mount options.
+
+    -S
+      Don't automatically connect to the container via ssh after it's started.
+      The DEFAULT IS TO CONNECT, so you'll immediately be inside the container
+      in your terminal, unless this option is passed. This option is useful if
+      you want to start your container, with, say, a database, but there isn't
+      a point to connect to it, as you're not intending to do anything with it
+      as a user.
+
+    -d
+      Print debug information
+
+    -y
+      Dry run: just show what would be the different variables involved in
+      creating/starting/connecting containers and the images that are either
+      used to create containers or on which existing containers are based
+      of. At this point it will print the same info as when you use the
+      "debug" flag -d, only without proceeding with the actions.
+
+
+USEFUL ALIASES
+--------------
+For your convenience, dock's installation script will ask you whether you want
+to add aliases for the most frequently used Docker commands. The aliases can
+be found in the ./local/docker_aliases.sh file and the installation script
+will add them (with your permission, of course) into your .bashrc or
+.zshrc or any shell rc file of your choice that supports the `alias` directive.
+
+The output is intentionally formatted to be concise and informative enough.
+Below is the list of aliases along with their short description.
+
+   `di`
+      Lists docker images.
+
+   `dc`
+      Lists docker containers, stopped or running
+
+   `dock-r`
+      Connects you to the container as root - same as `dock -u root`,
+      and accepts all the other cli-arguments that `dock` accepts.
+
+   `dcs` [CONTAINER_NAME]
+      Stops the container, but don't remove it. Marginally useful,
+      for example when testing dock startup_jobs inside the container.
+      (Interestingly enough, this is slower than stopping AND removing
+      the container with `dcr` - see below).
+
+   `dcr` [CONTAINER_NAME]
+      Shuts down and removes Docker container. Don't forget to
+      commit changes to an image if you want to retain them.
+
+   `dcom` [CONTAINER NAME] [IMAGE_NAME]
+      Commits changes from container to image
+
+   `dri` [FULL_IMAGE_NAME]
+      Removes docker image (CAREFUL!)
+
+   `dc-size`
+      List Docker containers size (will take time to calculate).
+      Marginally useful when you feel you might have installed too much and
+      container size needs to be checked.
+
+These aliases will help you navigate things more easily,
+but `dock` itself DOES NOT rely on these aliases, so if
+they're not added, everything will still work.
+
+CONTRIBUTING & CONTACTING
+-------------------------
+See ./CONTRIBUTE and ./MAINTAINERS files respectively.

@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+source $HOME/.dockrc
+
+BASHJAZZ_PATH="$DOCK_PATH/vendor/bashjazz"
+source $BASHJAZZ_PATH/utils/assign_vars_from_out.sh
+source $BASHJAZZ_PATH/utils/get_script_dir.sh
+source $BASHJAZZ_PATH/utils/formatting.sh
+source $DOCK_PATH/lib/container.sh
+dock_network=${DOCK_NETWORK_NAME:-dock0}
+
+# Dash (-) arguments
+positional_arguments=()
+
+while [ $OPTIND -le "$#" ]
+do
+  if getopts v:t:u:c:hpwnMSHdy option; then
+    case $option in
+      # ssh username to use when calling `./ssh_to_docker connect` below.
+      # Defaults to "docker", but sometimes we want "root".
+      (u) ssh_username=$OPTARG;;
+      #
+      # Mounts additional directories into the container. Format is the same
+      # as in Docker, consult the manual: https://docs.docker.com/storage/bind-mounts/
+      (v) custom_mounts="$custom_mounts -v $OPTARG";;
+      #
+      # Defines some ssh connection options. Currently there's just one, which is the theme for the
+      # terminal to use. It ONLY works in Tilix, because that's the one I use,
+      # (https://gnunn1.github.io/tilix-web/) and it hasn't been tested in other Terminals).
+      # Themes to use (including the default one are defined in ~/.dockrc on the host.
+      (t) ssh_terminal_theme=$OPTARG;;
+      #
+      # Run another command form the sourceable of bin directories, passing arguments to it.
+      (c) run_command=${OPTARG:-"!EMPTY!"};;
+      #
+      # Run docker container with the --privileged flag. More info can be found
+      # here: https://www.redhat.com/sysadmin/privileged-flag-container-engines
+      # It helps with setting up Wireguard and other network-related things.
+      (p) privileged="--privileged";;
+      #
+      # DO NOT mount whatever is specified in the $DEFAULT_MOUNT_OPTIONS, regardless of whether
+      # the -v flag was used or not.
+      (M) do_not_use_default_mount_options=1;;
+      #
+      # Create a new container regardless of whether there's already an existing container.
+      # This is marginally useful as Docker would not allow you to have two different containers
+      # with the same name, but it might help to remove some ambiguity when using `dock`, however
+      # it's probably best to avoid it at this point.
+      (n) create_new_container="yes";;
+      #
+      # By default, current directory from which the `dock` script is launched will be mounted
+      # to /home/docker/main inside the container. This option prevents it from being mounted.
+      # as well as instructs instructs the ./ssh_to_docker to connect to /home/docker
+      # instead of /home/docker/main (which wouldn't exist in that case). Generally speaking,
+      # when connecting to the container, ./ssh_to_docker checks if the ~/main directory exists
+      # inside the container and if not, it simply connects to the home directory of the selected
+      # user (usually /home/docker or /root).
+      (H) do_not_mount_current_dir=1;;
+      #
+      # Don't automatically connect to the container via ssh after it's started.
+      # The DEFAULT IS TO CONNECT, so you'll immediately be inside the container
+      # in your terminal. This option is useful if you want to start your
+      # container, with, say, a database, but there isn't a point to manually do anything
+      # inside the container itself - you just want it started and you're not
+      # intending to do anything with it.
+      (S) do_not_connect_to_ssh=1;;
+      #
+      # Prints debug information - variables used to create, start and connect to containers,
+      # depending on the circumstances.
+      (d) debug=1;;
+      #
+      # Dry run: same as -d, but also prints out the intended `docker run` command it would execute
+      # (which the script does anyway - it doesn't create new containers without confirmation). However,
+      # as the name implies, it EXITS without proceeding with the actions.
+      #   NOT TO CONTRIBUTORS: the check is performed inside the ./start_container script
+      #                        so it would also print the intended `docker run` command.
+      (y) dry_run=1;;
+      #
+      # It currently only displays basic information along with the version from the VERSION file.
+      (h) show_help=1;;
+    esac
+  else
+    positional_arguments+=("${!OPTIND}")
+    ((OPTIND++))
+  fi
+done
+
+if [[ -n $show_help ]]; then
+  echo "dock v$(cat VERSION)"
+  cat $DOCK_PATH/LICENSE
+  exit 0
+fi
+
+
+pos_arg1="${positional_arguments[0]}"
+pos_arg2="${positional_arguments[1]}"
+# ^ That's all we have to say for any positional arguments passed.
+
+if [[ -z $do_not_use_default_mount_options ]]; then
+  # We need to remove new lines in default mounting options
+  # because they will be part of the command run by `eval`.
+  mount_options=$(echo $DEFAULT_MOUNT_OPTIONS | tr '\n' ' ')
+fi
+
+# This ensures that if the -M flag was NOT provided - meaning $mount_options
+# should not empty at this point, both default and custom mounts are added to the list of mount options.
+if [[ -n "$custom_mounts" ]]; then
+  mount_options="$mount_options $custom_mounts"
+fi
+
+# Makes important decision of whether to start a new container, connect
+# an existing one, which image to choose if a new container is created etc.
+# Read ./documentation/DECISION_TREE.txt for details.
+source $DOCK_PATH/lib/decision_tree.sh
+
+# This is might be useful to understand the logic of determining image/container names.
+# Even though we print the full docker command anyway, you don't get to see all the variables
+# that are involved in making the decision of whether to create a new container or start/connect
+# to an existing one and which image to use.
+if [[ -n $debug ]] || [[ -n $dry_run ]];
+  then source $DOCK_PATH/lib/debug.sh main;
+fi
+
+# We check for $create_new_container, because if we're about to
+# create a new container, we want to display the full `docker` run
+# command before exiting, thus this code is also repeated in ./start_container
+if [[ -n $dry_run ]] && [[ -z $create_new_container ]]; then
+  echo -e "$(ind 4; color yellow) DRY RUN (-y flag used). Exiting without performing any actions.\n"
+  exit
+fi
+
+if [[ "$decision_tree_result" == *"ERROR"* ]]; then exit 1; fi
+
+# Run any command that's an executable inside ./bin/ if we see a "-c" flag, then exit.
+# because we source it, it means it gets access to all the variables already created
+# in this script, which is very useful. This also means that each script in ./bin/ must
+# be aware of that fact and not throw error in case its not provided with correct arguments
+# itself (as would be the case if it was called directly), but, rather, use the existing variables from this script.
+#
+# For example, here are the two commands that should yeild equal result:
+# 
+#     $ ./dock container1 -c cleanup_container  |
+#                                               | -> both MUST do the exact same thing.
+#     $ ./bin/cleanup_container container1      |
+#
+# To achieve that, scripts in $DOCK_PATH/bin must be aware of that fact and check
+# if a certain variable they need already exists. The priority, however, must be given
+# to arguments that are passed to the script such that this command:
+#
+#     $ ./dock container1 -c 'cleanup_container container2'
+#
+# results would be equivalent to this command:
+#
+#     $ ./bin/cleanup_container container2
+#
+if [[ -n "$run_command" ]]; then
+  if [[ "$run_command" == "!EMPTY!" ]]; then
+    >&2 echo -e "$(color red) ERROR: option -c requires an argument."
+    >&2 echo -e "which can be any filename from $DOCK_PATH/bin/ followed by the arguments you want to pass to it."
+    exit 1
+  elif [[ ! -f "$DOCK_PATH/bin/${run_command[0]}" ]]; then
+    >&2 echo -en "$(color red) ERROR: executable file $(color off)$DOCK_PATH/bin/${run_command[0]}"
+    >&2 echo -e  "$(color red) doesn't exist.$(color off)"
+    exit 1
+  else
+    $DOCK_PATH/bin/${run_command[@]} ${positional_arguments[@]}
+    exit $?
+  fi
+fi
+
+# Heavy lifting code to actually launch a Docker container
+source $DOCK_PATH/bin/start_container # will exit if it cannot start the container
+
+if [[ -z "$container_was_running" ]]; then
+  # Print the information about the container after it's created and/or started
+  source $DOCK_PATH/bin/print_container_info
+fi
+
+if [[ -z "$do_not_connect_to_ssh" ]]; then
+  source $DOCK_PATH/bin/ssh_to_docker
+fi

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#
+# This simply gives us a little bit of information about the current
+# directory we're in in a digestible format we can later use to imply
+# $project_name and $container_name - if needed.
+#
+# More importantly, because the default behavior is to mount $PWD
+# into the /home/docker/main directory inside the container, current
+# this simply copies the value of  puts $PWD into $project_path variable
+# used in other scripts.
+#
+# I decided to make it a separate script as it doesn't actually belong
+# to either ./container_info or ./image_info or ./project_info and
+# the information it provides may or may not be used by either of them.
+
+project_path="$PWD"
+project_dir_name="$(echo "$project_path" | grep -oE '[^/]+$')"
+
+echo "project_path=$project_path"
+echo "project_dir_name=$project_dir_name"

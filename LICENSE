@@ -1,0 +1,41 @@
+LICENCE (BSD Zero Clause License)
+---------------------------------
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.[20]
+
+This software is free for all and it is allowed to use for personal, commercial
+or other peaceful purposes. No link-backs are necessary. You're allowed to clone,
+copy, modify and contribute to this project. It is provided as is with and
+maintainers and/or contributors are not responsible for any damage it may does
+(but the hope is that it actually does the opposite - good).
+
+
+THINGS NOT CONCERNING LICENSING
+-------------------------------
+PLEASE CONSIDER leaving the "donation message" which is displayed to
+users connecting to the container as is - especially when you distribute your
+custom dock-compatible images. You are free to add or your own welcome message
+or remove it completely, as it was decided not to prohibit this in the LICENCE.
+
+    As the welcome message starts to annoy - by all means, disable it - all you
+    have to do is add DISABLE_DOCK_WELCOME MESSAGE=1 into your ~/.dockrc file.
+
+
+FORKING
+-------
+If you decide to fork the repository and publish it some place else, it would
+be of great help if you kept the message, the original links the maintainer's
+website and donation information without modifications. Your help in this regard
+- not removing the donation info - would be greatly appreciated - not just
+by the project maintainers, but by ordinary people too, as part of the money
+donated to the project will be funneled to those in dire need of help.
+
+See the official website at https://dock.orion3.space/donate for details.

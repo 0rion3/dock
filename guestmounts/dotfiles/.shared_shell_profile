@@ -1,0 +1,29 @@
+# This file is sourced by both ~/.profile and ~/.zprofile
+# Zsh runs ~/.zprofile, not ~/.profile, when it is invoked as a login
+# shell. The reason is that zsh has enough incompatibilities with
+# standard shells to break scripts.
+#
+# However, this file is intended to only update PATH (so far)
+# so no issues should arise.
+#
+# Adds every file inside the directory /usr/local/dock_bin into $PATH.
+# That's because we may want to mount different scripts in there.
+# Very useful, but be careful. This is useful for containers to share scripts
+# that are common and different directories may be mounted inside:
+# either by adding them to DEFAULT_MOUNT_OPTIONS in ~/.dockrc or manually.
+export BASHJAZZ_PATH="/usr/local/bashjazz"
+export SHARED_SCRIPTS_PATH="/usr/local/bashjazz"
+# /usr/local/bin/ should be added after as $BASHJAZZ_SCRIPTS has be given higher priority
+export PATH="$PATH$(find -L $SHARED_SCRIPTS_PATH -maxdepth 1 -type d -printf ":%p")"
+
+# Strangely, not added by default in Ubuntu.
+if [ -d "/usr/local/bin" ]; then PATH="/usr/local/bin:$PATH"; fi
+
+# And the final priority is given to user's home directories dock_bin & bin
+if [ -d "$HOME/dock_bin" ]; then PATH="$HOME/dock_bin:$PATH"; fi
+if [ -d "$HOME/bin" ]; then PATH="$HOME/bin:$PATH"; fi
+if [ -d "$HOME/.local/bin" ]; then PATH="$HOME/.local/bin:$PATH"; fi
+
+if [ -e $HOME/.local_profile ]; then
+  source $HOME/.local_profile
+fi

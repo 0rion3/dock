@@ -1,0 +1,348 @@
+GENERAL DESCRIPTION AND REQUIREMENTS FOR IMAGES COMPATIBILITY WITH `dock`
+-------------------------------------------------------------------------
+
+The purpose of this document is to cover the following subjects:
+
+  * How `dock` operates with images and containers created from them.
+
+  * Describe what kind of software images that are created or suggested [1]
+    to by `dock` maintainers have installed by default and which software is
+    not to be removed in order to maintain compatibility with `dock`.
+
+  * List and explain the environment settings inside a minimal dock-image
+    environment that affect compatibility with `dock` and also the things
+    that wouldn't affect compatibility, but are there to help work with
+    with containers based on a dock-compatible image.
+
+  * Explain the process of creating your own image from a modified container
+    based on an existing dock-compatible image - in such a way that compatibility
+    is retained, but you have installed the additional software you need and have
+    settings changed to suit your requirements.
+
+  [1] Links to various image files will be posted on the official website:
+      https://dock.orion3.space
+
+INTRODUCTION
+------------
+
+`dock` currently only supports Docker images, but the plan is start supporting
+other types of container engines too, first of which will most likely be
+FreeBSD jails [1]. When this support is added, additional documentation
+files may be added for various container engines. This file, while mentioning
+some of the Docker features, will stay relatively neutral, so try to think less
+about Docker and more about containers when reading it.
+
+  [1] FreeBSD jails: https://docs.freebsd.org/en/books/handbook/jails/
+
+
+PRE-INSTALLED EXTRA SOFTWARE
+----------------------------
+
+All dock-compatible images, including "dock/ubuntu20:stable" would have
+some additional [1] software installed and below there are two separates lists:
+one is for software that's absolutely required for compatibility with `dock`
+and one that's not required, but makes work with containers much more pleasant.
+
+At this point I believe that these very humble requirements shall be retained
+regardless of the image OS type as well as the container engine used (as was
+mentioned before, Docker is just one, that I had time to implement support for).
+
+
+  REQUIRED FOR DOCK-COMPATIBILITY
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+    * make
+    * sudo
+    * locales (generated and set to UTF-8.en_US)
+    * OpenSSH v8.9p1, OpenSSL v1.1.1f - *compiled form source [2]
+    * net-tools
+
+
+  NOT REQUIRED, BUT USEFUL
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+    * Vim 8.2.4512 - *compiled from source
+      with some minimal configuration options and plugins [3]
+
+    * ZSH shell
+      with a custom .zshrc and some manually added parts of "oh-my-zsh",
+      are useful in loading loading plugins and themes. But "oh-my-zsh"
+      itself (with all of the themes and plugins) is not installed.
+      Refer to the comments various files under ./guestmounts/dotfiles/.zsh
+      explaining the reasons for each change.
+
+    * ripgrep (`rg`) v11.0.2 -- see https://github.com/BurntSushi/ripgrep
+
+    [1] Listed above are packages installed when changes were made to the
+        original "amd64/ubuntu:latest" image pulled from Docker Hub,
+        which itself had some packages manually installed. To view all
+        custom-install packages use this command:
+
+            $ apt-mark showmanual
+
+        It also recommended to mark the packages you install with some appropriate
+        name, before creating your custom image. You can read how to do it by
+        typing `man apt-mark`.
+
+    [2] The reason that some software is compiled form source is because,
+        as turns out, installing via something via a package manager may
+        sometimes trigger the installation of tons of unnecessary, which
+        in some cases may take up to 50 times more space than a compiled
+        version would.
+
+    [3] "vim-tiny" turned out to to be too tiny in functionality, but not much
+        different in disk space it occupied.
+
+
+DOTFILES & PLUGINS
+------------------
+
+1. While the above mentioned software was installed into the image filesystem
+   itself, most configuration files, customizations and plugins are mounted
+   from the host machine's $DOCK_PATH/guestmounts/dotfiles directory as
+   read-only. However, they are mounted in read-only mode into the guest's
+   /usr/local/share/host_provided directory and appropriate symlinks already
+   exist for "root" and "docker" user's directory. Thus, if you want your
+   custom Vim configuration, for example, you can just remove the symlink
+   named ~/.vimrc or ~/.vim or both in each user's directory and add whatever
+   your like.
+
+2. Elaborating on (2) - because the main shell for the users is set to zsh,
+   but all scripts are written in bash or sh, it's important that the environment
+   is kept as identical as possible for zsh, bash and sh likewise. So to avoid
+   code duplication several files new dotfiles are introduced into home
+   directories of each user:
+
+        ~/.shared_shell_profile
+        ~/.shared_shell_env
+
+   These two are mounted as read-only and symlinked to user's home directories
+   and their purpose is similar to .profile/.bashrc or .zprofile/.zshrc
+   and, in fact, these files are sourced by them. If you want to learn more
+   about the difference between the two types of files (.*profile vs .*rc)
+   easy to digest explanations can be found here:
+
+      .profile & .bashrc ⸱⸱⸱⸱⸱⸱⸱⸱⸱ https://serverfault.com/a/261807
+      .zprofile & .zshrc ⸱⸱⸱⸱⸱⸱⸱⸱⸱ https://unix.stackexchange.com/q/71253
+      .zprofile & .profile ⸱⸱⸱⸱⸱⸱⸱ https://superuser.com/q/187639 
+                                   https://zsh.sourceforge.io/Intro/intro_3.html
+
+   When you wish to make changes to your environment, you would be better off
+   no removing the links to ~/.shared_shell_profile and ~/.shared_shell_env,
+   and replacing them with your own files, but rather creating files called
+   ~/.local_profile or ~/.local_env, which are sourced last, thus you can
+   add changes to overwrite anything you need inside these files.
+
+   To summarize, the purpose of introducing these new dotfiles is to
+   deal with this variety of shell files without code duplication. However,
+   when editing either of them, one must remember the code you introduce must
+   to be compatible with all shells that source them.
+
+   Furthermore, each user's home directories still have .profile, .bashrc,
+   .zprofile, and .zshrc files as they contain their own shell-specific code.
+
+
+MODIFYING CONTAINERS AND CREATING/UPDATING IMAGES
+-------------------------------------------------
+Generally, you don't want to make big changes to the image. You want to make
+changes to the project that's running on the container based on that image.
+Container/Image changes can be separated into four categories:
+
+  a) Personal adjustments (say, you don't like vim or zsh)
+
+  b) Generated data such as logs, history, etc. These can be scrapped
+    automatically by using `dock [CONTAINER_NAME] -c cleanup_container`
+
+  c) Changes that are required for a certain project, which uses the images
+    (like installing or updating PHP/Ruby/Python etc.). These can easily be
+    documented and communicated to teams, because hardly anything can go
+    wrong if multiple people run the same 4 or 5 commands on their
+    identical containers. However, even this will soon be automated soon.
+
+  d) Changes so complex or large, that we are all like "screw it,
+    it's not worth it, let's just re-download the image".
+
+This will be a brief overview with references to other, more elaborate
+documentation files concerning each topic. Some of these steps are only
+necessary if you plan on distributing your custom image either publicly on
+in some closed circle (your workplace or amongst your friends).  It is then
+when it's important to follow all of the steps carefully:
+
+As the section INCREMENTAL IMAGE UPDATES explains, there currently isn't any
+automation for incremental updates (useful section!). Ideally you'd want
+want to install some software, edit config files and then run some sort of
+diff on everything which would generate a "change script" for you. This is
+yet to be implemented.
+
+The current options are:
+
+  A. Keep track of it manually and create your own
+     list of changes - either as a plaintext file or an executable
+     bash script that you'd send everyone to run and apply changes.
+     If you choose this option, you may omit all the steps below.
+
+  B. Create a create a new image, export and release it and let
+     others download and import it. In this scenario, keep on reading...
+
+With option (B), you would want to do follow a number of important steps to
+prepare the image for the release, regardless of how you plan on
+distributing it.
+
+
+PREPARING IMAGE FOR THE RELEASE
+-------------------------------
+
+  1. Ensure you get rid of all the large files on the image's filesystem 
+     you don't actually need them.
+
+  2. If your image requires additional mounted directories, please
+     write a memo about it, as this process isn't automated.
+
+  3. Clean the image out of unnecessary files that increase its size, pollute
+     the filesystem or affect your privacy. This step is mostly automated,
+     at least for the images distributed by `dock` maintainer. Use
+     the following command when your container is still up and running,
+     but you're ready to commit it:
+
+        $ dock [CONTAINER_NAME] -c cleanup_container
+
+     This command will present you with a list of files and directories
+     (some with wild cards such as /var/log/*) that it proposes to remove.
+     Carefully check the list. Not all files may not exist, as this list
+     hard-coded into the cleanup script, but if you confirm and type "yes"
+     it will attempt to remove them all and will inform you which ones
+     existed and are now deleted. The removal commands are NOT issued through
+     ssh, so there will be no connection logs left either.
+
+
+  DOCKER-SPECIFIC STEPS
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+    4. Squash the image into one layer
+
+       Docker has this particularly annoying feature, which is called
+       "Layers". While it's useful for those buying into how Docker is supposed
+       to be used, the problem with layers is that as you work on your image,
+       change and commit it many times and then finally you're ready for a
+       release, you may forget to remove something sensitive, that wasn't
+       supposed to be there. And while the cleanup_container script (3) will
+       remove the files from the container filesystem, the files may be retained
+       inside the layers of which the image is comprised.
+
+       This is why Docker has the --squash option to the `docker build` command,
+       but this command also requires a Dockerfile (which we decided we're not
+       going to have). Luckily, there's a good tool called "docker-squash" [1]
+       someone came up with that take care of that job for you. While it's an
+       external tool written in Python, I can't really recommend anything else
+       or rewrite it in Bash at the moment - the tool seems to be quite complex,
+       so I assume Docker team made it quite a hassle to squash images properly.
+
+       To use it, installed following the instructions on the its Github page
+       and then simply run this command:
+
+           $ docker-squash --tag [SQUASHED_IMAGE_NAME] [SOURCE_IMAGE_NAME]
+
+       [1] https://sleeplessbeastie.eu/2021/09/17/how-to-squash-docker-image/
+           https://github.com/goldmann/docker-squash
+
+    5. To distribute the image you have two options:
+
+       a) Push Docker hub:             $ docker push [IMAGE_NAME]
+       b) Save into a .tzg archive:    $ docker save -o filename.tgz [IMAGE_NAME]
+
+    6. After uploaded your image, give instructions on how to obtain the image
+       to the people who are supposed to have import it:
+
+      a) Pulling from Docker Hub:       $ docker pull [IMAGE_NAME]
+      b) Loading from a .tgz archive:   $ docker image load -i filename.tgz
+
+         IMPORTANT: regardless of the filename in case (b), when that image is
+         loaded on another machine, it will retain its full name "repo/name:tag"
+         as assigned by you before exporting, and may rewrite an already existing
+         name (without deleting the image though, it'll just become untagged).
+
+         This feature of Docker is certainly not very nice - they should at
+         least ask you if you want to overwrite an existing tag. So please
+
+         TODO: I think soon enough, I'll add an import tool to `dock` that
+         will actually check for name collisions.
+
+
+INCREMENTAL IMAGE UPDATES
+-------------------------
+Unfortunately this isn't implemented yet, sorry to disappoint. It has been a
+one man show. I looked at Dockerfiles and Docker Compose and how they do things,
+and it turns out there's very little benefit in having some DSL that
+you need to understand - the order in which these rules apply and whether
+some of things are even possible.
+
+From my point of view, a Bash script that would do an incremental update on
+a container, then commit it as the latest version of a particular image is
+much more reliable.  The obsession with a 100% identical environment isn't
+what concerns me as a developer on my local machine. As of now, I don't even
+mind re-downloading a few heavy images if they're useful.
+
+The idea I have is to maybe keep a repository for each image with a serious
+of scripts, much like database migrations. This can go a long way. Once the
+image went from, say, 1Gb to 2Gb, it makes sense for others to download it,
+instead of applying a serious of patches. And if one of the patch scripts
+doesn't do as intended, it is a certainty it'll will be noticed.
+
+But, as I said, this is a TODO. I hope to get to it soon, although it isn't
+my personal priority.
+
+
+RUNNING SERVICES
+----------------
+Docker doesn't do stuff like systemd or init.d very well. It either requires
+some sort of privileges or just doesn't work. Since I started with Docker,
+and not some other container engine, I thougt about what would be simple way
+to list services of just some tasks that they want to invoke when a container
+is started.
+
+The Docker-way of doing this is to specify things in a Dockerfile...
+
+But the dock-way of launching services it to a file inside the container/image
+itself. Just add whatever you need to /root/docker_bin/startup_jobs and it will
+be invoked. In the default Ubuntu image, for example, take a look at
+this file and you will see how `sshd` is launched there by invoking
+the usual `service ssh start`. So you can do the same thing with
+any other init.d service.
+
+
+WHY NO DOCKERFILES?
+-------------------
+It hopefully won't be long before this script-suite supports other
+virtualization platforms, which can be as lightweight as docker itself
+or as heavy as KVM/QEMU. Because why not. I didn't have a plan, I just wrote it.
+
+But the problem with docker files isn't just they're only useful for Docker.
+It's that you have to keep them inside your project directory, which defeats
+the goal of not having config files for every project (which is mostly the same,
+most of the time). I the little configuration that's needed for various projects
+when launching images shall be stored inside ~/.dockrc (not yet everything
+is implemented, but ip-address assignment works, for example). Everything else,
+that's heavy shall pre-configured inside the image itself and distributed along
+with it.
+
+
+CHANGE DEFAULT PASSWORDS
+------------------------
+When you sign in into the container created from the default image, change
+the default password for "root" and "docker" users. The default passwords
+are not published here in case someone forgets to change them, but to change
+the passwords you don't actually need to know them. Use the `dock -r` command
+(it means connect to the root account) and from there you can do it without
+entering current passwords:
+
+    $ dock -r
+      # you're INSIDE THE CONTAINER NOW
+    $ passwd # Changes password for "root" user
+      # Enter the new password twice
+    $ passwd docker # changes password for user "docker" 
+      # Enter the new password twice
+    $ exit
+      # You're back to your host system.
+
+While connecting via ssh using passwords is disabled by default, it's still
+still advised to change them. Who knows what kind of software you're going to
+be installing into your container - could be some obscured malware from one of
+the package-management systems that would attempt to bruteforce the passwords.

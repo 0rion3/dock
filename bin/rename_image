@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+docker image tag $1 $2
+docker rmi $1

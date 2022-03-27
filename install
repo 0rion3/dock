@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# No sudo privileges required to run it:
+# All the function calls are sourced from $SCRIPT_PATH/lib/install.sh
+
+SCRIPT_PATH="$( cd -P "$( dirname "$0" )" && pwd )"
+BASHJAZZ_PATH="$SCRIPT_PATH/vendor/bashjazz"
+DEFAULT_IMAGE_FULL_NAME="${DEFAULT_IMAGE_FULL_NAME:-'dock/ubuntu20:stable'}"
+DOCK_NETWORK_NAME="${DOCK_NETWORK_NAME:-dock0}"
+source $BASHJAZZ_PATH/utils/formatting.sh
+source $SCRIPT_PATH/lib/image.sh
+source $SCRIPT_PATH/lib/install.sh
+
+USER_SHELL="$(source $BASHJAZZ_PATH/utils/user_shellname.sh)"
+
+check_requirements
+get_image_file
+import_image
+create_network
+copy_dokrc && replace_default_values_in_dockrc
+add_docker_aliases
+symlink_bin_dock_into_user_path_dir
+
+
+if [[ $? != 0 ]]; then
+  echo -e "\n$(ind 4; color red)Cannot complete installation.$(color off)"
+else
+  echo -e "\n$(ind 4; color green)INSTALLATION COMPLETE$(color off)"
+  echo -e "$(ind 4)To test if everything works - navigate to a directory with one of your"
+  echo -e "$(ind 4)projects and type:\n"
+  echo -e "$(ind 8; color yellow)\$ $(color off)dock\n"
+  echo -e "$(ind 4)It shall work with no additional effort."
+  echo -e "$(ind 4; color dim)In case you find a bug with this installation script"
+  echo -e "$(ind 4)or \`dock\` itself, please report it here: https://dock.orion3.space/contact\n"
+fi

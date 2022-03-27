@@ -1,0 +1,45 @@
+MAINTAINERS
+-----------
+
+Information for each contributor and/or maintainer will be published in this
+file according to the specific preferences they might have. If someone doesn't
+want to be contacted - then their contact information will not be published.
+
+See ./CONTRIBUTE for the information on how you can contribute code, resources,
+knowledge, funding or a number of other things to this project - since it's an
+intentionally a self hosted repository, you'd have to contact one of the
+maintainers.
+
+  CURRENTLY ONLY ONE - THE ORIGINAL AUTHOR: orion3
+  ––––––––––––––––––––––––––––––––––––––––––––––––
+
+    EMAIL
+
+      Use the domain name of the project stripping "dock." from it and
+      adding the maintainer's nickname before the @ sign.
+
+          --> correct email you shall end up with contains the nickname twice.
+
+      Messages currently go through Protonmail, so if you're also sending from
+      Protonmail you don't have to bother and encrypt them manually.
+
+      If you want to encrypt your message, but you do not have a Protonmail
+      account you can encrypt your message with this maintainer's PGP public key.
+      Be advised: this key is used ONLY for communication from the email
+      specified above. IT IS NOT used for signing releases or any other number 
+      of things PGP is employed for.
+
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+
+      mDMEYixl9RYJKwYBBAHaRw8BAQdACkXSpgWutPz501CbQgIoYk+7wC2N4sHCTOcB
+      hQo3DtC0KW9yaW9uM0BvcmlvbjMuc3BhY2UgPG9yaW9uM0BvcmlvbjMuc3BhY2U+
+      iI8EEBYKACAFAmIsZfUGCwkHCAMCBBUICgIEFgIBAAIZAQIbAwIeAQAhCRAs0a6g
+      gjNSMRYhBJ/z5xkmd/cdVet1dSzRrqCCM1IxbQEBAMpmq1BezIr/XlMayP/gvrTf
+      K3fz34S9YrIRdvazdUMQAP4zebReqLngKslq6+7GQkpLLuQtQDvxnAYV+FtgXpDQ
+      Dbg4BGIsZfUSCisGAQQBl1UBBQEBB0CKqBWRT0RiunEzGQGsxUiVj5UnbcyvB0Du
+      J5bit5kZJQMBCAeIeAQYFggACQUCYixl9QIbDAAhCRAs0a6ggjNSMRYhBJ/z5xkm
+      d/cdVet1dSzRrqCCM1IxRHcA/iFU5uw0CBacRwcnMMrKCt/W0ng89Ig6hSsJNPe+
+      Ic/WAQCxk6q9wiv5Lp3RQWRwWAb4Fb5OBBar+s4rdKDsMYipAA==
+      =QTCt
+      -----END PGP PUBLIC KEY BLOCK-----
+

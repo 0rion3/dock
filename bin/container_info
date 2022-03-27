@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+source $HOME/.dockrc
+source $BASHJAZZ_PATH/utils/assign_vars_from_out.sh
+source $BASHJAZZ_PATH/utils/split_string_pipe.sh
+source $DOCK_PATH/lib/container.sh
+
+container_info="$(Container_info $1)"
+
+if [[ -n "$container_info" ]]; then
+  # If container exists, we return its information as variables,
+  # adding the container_image_name to it too. What to do with it, if
+  # if differs from the values received from ./image_info previously
+  # is up to the main script.
+  echo "$(echo "$container_info" | split_string "," '\n')"
+else
+  # But if no container found, we assume that ./start_container
+  # script will have to create a new container from the specified image,
+  # Thus $create_new_container is set to yes variable
+  # (this behavior can be force with the -n flag).
+  echo "create_new_container=yes"
+fi

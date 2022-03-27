@@ -1,0 +1,36 @@
+TERMINALS INTEGRATION
+---------------------
+
+When you connect to a container by typing `dock`, the script will attempt
+to change your terminal theme (if you create one for it). It helps you see
+that you're inside a container when your terminal changes theme and its
+background becomes blue instead of black
+
+Possibly some other terminal-related features can be added, apart from just
+switching themes. But currently only the "Tilix" terminal is supported.
+As more terminals support is added (I don't know which ones can do the same
+thing, though), this file will be updated with appropriate instructions.
+
+
+  Tilix
+  -----
+  Website: https://gnunn1.github.io/tilix-web/manual/title/
+
+    STEPS TO INTEGRATE
+    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+    1. Go to Tilix Preferences -> Profiles and create a new profile
+       called "Dockguest" that you'd like to be your default dock-themed profile.
+       Then change any settings as you wish including the color scheme.
+
+    2. Go to the "Advanced" tab of this profile and in the
+       "Automatic profile switching" section click add, then
+       enter "Dockguest:" - just like that, ending on ":".
+
+    3. Try connecting to the container using the `dock` command
+       and see that your theme had changed.
+
+  You can create other themes too, as in fact, suggested by the ./dockrc.template
+  file and assign each theme its own container name. If your container name
+  containers dots "." as they frequently might if you create them with `dock`,
+  you should replace dots with dashes "-" in ~/.dockrc.
