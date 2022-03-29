@@ -54,6 +54,9 @@ alias gsu="git submodule update"
 
 alias ls="ls -al --block-size=K --color"
 
+if [ -f /usr/local/etc/.local_env ]; then
+  source /usr/local/etc/.local_env
+fi
 if [ -f $HOME/.local_env ]; then
   source $HOME/.local_env
 fi

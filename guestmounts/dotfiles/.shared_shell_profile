@@ -24,6 +24,9 @@ if [ -d "$HOME/dock_bin" ]; then PATH="$HOME/dock_bin:$PATH"; fi
 if [ -d "$HOME/bin" ]; then PATH="$HOME/bin:$PATH"; fi
 if [ -d "$HOME/.local/bin" ]; then PATH="$HOME/.local/bin:$PATH"; fi
 
+if [ -e /usr/local/etc/.local_profile ]; then
+  source /usr/local/etc/.local_profile
+fi
 if [ -e $HOME/.local_profile ]; then
   source $HOME/.local_profile
 fi

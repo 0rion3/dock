@@ -294,7 +294,7 @@ RUNNING SERVICES
 ----------------
 Docker doesn't do stuff like systemd or init.d very well. It either requires
 some sort of privileges or just doesn't work. Since I started with Docker,
-and not some other container engine, I thougt about what would be simple way
+and not some other container engine, I thought about what would be simple way
 to list services of just some tasks that they want to invoke when a container
 is started.
 

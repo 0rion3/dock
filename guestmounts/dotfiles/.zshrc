@@ -51,12 +51,12 @@ fi
 # things .oh-my-zsh provides. The rest are mostly expendable.
 plugins=( git-prompt history-substring-search )
 
+# Prevents Vim from freezing up when Ctrl+s is pressed,
+# which is a shortcut for :wq that's already set in .vimrc
+stty -ixon
+
 source $ZSH/oh-my-zsh.sh
 
 if test -e "$HOME/.shared_shell_env"; then
   source $HOME/.shared_shell_env
 fi
-
-# Prevents Vim from freezing up when Ctrl+s is pressed,
-# which is a shortcut for :wq that's already set in .vimrc
-stty -ixon

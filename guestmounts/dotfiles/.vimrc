@@ -69,7 +69,7 @@ set foldlevel=100
 ""--------- BLOCK setting custom filetypes ---
   filetype plugin on
 
-  " All files without extentions that don't start with #!/
+  " All files without extensions that don't start with #!/
   " are to be treated as plaintext files.
   autocmd BufNewFile,BufRead * if (expand('%:t') !~ '\.' && getline(1) =~ '^/\!#') | setf text | endif
 
@@ -79,6 +79,8 @@ set foldlevel=100
   let b:is_bash = 1 " Make vim treat .sh files as bash
   autocmd FileType * set textwidth=120
   autocmd FileType * map gq :%!fmt -w 80<CR>
+  autocmd BufNewFile,BufReadPost *._shell_env     set filetype=bash
+  autocmd BufNewFile,BufReadPost *._shell_profile set filetype=bash
   autocmd FileType text set textwidth=80 " not comfortable to read them otherwise
   autocmd FileType text map gq :%!fmt -w 80<CR>
 

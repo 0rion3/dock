@@ -1,0 +1,84 @@
+#!/bin/bash
+cd $HOME
+
+# This script is only to be run manually by image maintainers.
+# in order to provide the standardized environment defined
+# by the `dock` toolset.
+
+# The ../dotfiles/ directory which does exactly that with
+# all the preconfigured dotfiles, is automatically mounted
+# into the
+
+DOTFILES_PATH=/usr/local/share/host_provided/dotfiles
+
+# on the guest. But while mounting, `dock` doesn't replace or append
+# to the dotfiles in each user's $HOME directories. This script exists for
+# that purpose. It provided a quick way to make any image at least partially
+# dock-compatible. It does a few things, which may seem odd, but there's
+# reasoning behind each.
+
+# 1. It creates these empty files (note that we changed dir to $HOME above).
+touch .local_env
+touch .local_profile
+# If you want certain things to be the same for both "root" and "docker" user
+# (create and) modify /usr/local/etc/.local_env and /usr/local/etc/.local_profile
+# files. They will be sourced BEFORE the similarly named files in $HOME.
+#
+# When you only want changes for one of the users, but not the other,
+# modify the respective files inside their home directories and don't touch
+# the ones in /usr/local/etc/
+#
+# 2. These files will be sourced last into any shell rc file file by the
+#    means of the following dotfiles, which are themselves symlinked into
+#    the user's $HOME directory:
+#
+#      $DOTFILES_PATH/shared_shell_profile
+#      $DOTFILES_PATH/shared_shell_env
+#
+# The /usr/local/etc/local_env, /usr/local/etc/local_profile, $HOME.local_env
+# and $HOME/.local_profile files are always unique to the image/container.
+# But $DOTFILES_PATH/shared_shell_env and $DOTFILES_PATH/shared_shell_profile
+# are not - in fact the $DOTFILES_PATH is mounted from the host's ../dotfiles
+# directory in read-only mode. The reasons for this are the following:
+#
+#   a) zsh uses $HOME/.zprofile, and never $HOME/.profile
+#
+#   b) We want more or less the same environment in both shells - not in terms
+#      the looks, but the actual environment variables and other settings. Most
+#      scripts that are provided by the `dock` toolset and employed inside
+#      images for various purposes are written in Bash. So if you install
+#      something from zsh, you probably want it to work in Bash as well.
+#
+# 3. Finally, source everything in correct order. We'll need to remove
+#    pre-existing symlinks from the previous versions the image (this is changed
+#    behavior on the part of `dock`).
+rm .profile  && echo "source $DOTFILES_PATH/.profile"  > .profile
+rm .zprofile && echo "source $DOTFILES_PATH/.zprofile" > .zprofile
+rm .bashrc   && echo "source $DOTFILES_PATH/.bashrc"   > .bashrc
+rm .zshrc    && echo "source $DOTFILES_PATH/.zshrc"    > .zshrc
+rm .inputrc  && echo "source $DOTFILES_PATH/.inputrc"  > .inputrc
+rm .vimrc    && echo "so $DOTFILES_PATH/.vimrc"        > .vimrc
+
+# 3a. Let's add a warning about potential changes to these files by third-party
+#     installation scripts.
+add_rc_file_warning() {
+echo "# Certain installation scripts, such NVM (node version manager)
+# would want to insert their stuff into user's shell rc files, such as this one.
+# Some scripts may only add whatever they need to add into your current shell's
+# rc file, but not the others. We obviously wouldn't want that in most cases,
+# thus it is advised to move whatever is added below into $HOME/.local_$2 " \
+>> $1
+}
+
+add_rc_file_warning .bashrc   env
+add_rc_file_warning .zshrc    env
+add_rc_file_warning .profile  profile
+add_rc_file_warning .zprofile profile
+
+# 4. Finally, we symlink larger changes that shape what zsh and vim look like.
+#    we'll symlink them directly, without regard for any kind of changes
+#    user might want to make because, if you want to make changes, you can
+#    always add a few lines to either $HOME/.zshrc or $HOME/.vimrc to source
+#    other directories/files.
+rm -rf .zsh && ln -s $DOTFILES_PATH/.zsh
+rm -rf .vim && ln -s $DOTFILES_PATH/.vim
