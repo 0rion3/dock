@@ -316,7 +316,7 @@ EXAMPLES
       $ cd ~/dev/pets/project1
   ––> $ dock dock/ruby3:stable project1
 
-      # RESULT: a new container is created with the name "project1.pets"
+      # RESULT: a new container is created with the name "project1"
       #         based on the dock/ruby3:stable image (it must exist).
       #         The ".pets" part is stripped because an explicit second
       #         argument was provided, relieving the script of any ambiguity.
