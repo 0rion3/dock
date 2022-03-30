@@ -2,7 +2,8 @@ source $BASHJAZZ_PATH/utils/formatting.sh
 
 Container_exec() {
   local OPTIND
-  local user="root"
+  local encode;
+  local user;
   while getopts "u:e" opt; do
     case $opt in
       # Encoded command with base 64, the container will decode and run it.
@@ -14,11 +15,13 @@ Container_exec() {
     shift $((OPTIND-1))
   done
 
+  user=${user:-root}
   if [[ -n $encode ]]; then
     cmd="$($BASHJAZZ_PATH/utils/base64_exec $1)"
     docker exec -u $user $container_name /usr/local/share/host_provided/scripts/base64_exec $cmd
   else
-    docker exec -u $user $container_name bash -c "${@}"
+    # Use login shell (-l), this way $HOME/.bashrc is sourced.
+    docker exec -u $user $container_name bash -l -c "${@}"
   fi
 }
 

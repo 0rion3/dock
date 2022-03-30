@@ -17,6 +17,7 @@ case $1 in
     echo "$project_info"
     echo "------------------------------------------------------------"
     echo "[DEBUG] CONTAINER VARIABLES"
+    echo "container_name=$container_name"
     echo "container_image_name=$container_image_name"
     echo "container_ip_addr=$container_ip_addr"
     echo "------------------------------------------------------------"

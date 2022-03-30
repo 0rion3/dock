@@ -43,7 +43,7 @@ ssh $ssh_username@dock0-guest -F ~/.ssh/dock_config_$ssh_suffix \
   'bash -l -c "test -f ~/dock_bin/connection_jobs && ~/dock_bin/connection_jobs"'
 
 TerminalTheme_change_to_container_theme
-source $DOCK_PATH/hostscripts/dock_welcome_message.sh
+source $DOCK_PATH/hostscripts/dock_welcome_message.sh $ssh_username
 
 # Only change dir to /home/docker/main if it's mounted
 pwd_mounted="$(docker inspect -f '{{ .Mounts }}' "$container_name" | grep '/home/docker/main')"

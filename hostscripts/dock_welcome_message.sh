@@ -3,6 +3,8 @@ source $HOME/.dockrc
 source $DOCK_PATH/lib/container.sh
 source $BASHJAZZ_PATH/utils/formatting.sh
 
+user=${1:-root}
+
 # To disable welcome messages from being printed upon connecting
 # simply add DISABLE_DOCK_WELCOME MESSAGE=1 into ~/.dockrc 
 if [[ -z $DISABLE_DOCK_WELCOME_MESSAGE ]]; then
@@ -34,7 +36,8 @@ if [[ -z $DISABLE_DOCK_WELCOME_MESSAGE ]]; then
   #    This is where you'd normally put some details about the OS and software
   #    installed and some other things.
   printf "$(color dim)"
-  Container_exec 'test -f /usr/local/etc/welcome_message.sh && /usr/local/etc/welcome_message.sh'
+  Container_exec -u $user \
+    'test -f /usr/local/etc/welcome_message.sh && /usr/local/etc/welcome_message.sh'
   printf "$(color off)"
 
 fi
