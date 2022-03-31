@@ -107,29 +107,6 @@ if [[ -n "$custom_mounts" ]]; then
   mount_options="$mount_options $custom_mounts"
 fi
 
-# Makes important decision of whether to start a new container, connect
-# an existing one, which image to choose if a new container is created etc.
-# Read ./documentation/DECISION_TREE.txt for details.
-source $DOCK_PATH/lib/decision_tree.sh
-
-# This is might be useful to understand the logic of determining image/container names.
-# Even though we print the full docker command anyway, you don't get to see all the variables
-# that are involved in making the decision of whether to create a new container or start/connect
-# to an existing one and which image to use.
-if [[ -n $debug ]] || [[ -n $dry_run ]];
-  then source $DOCK_PATH/lib/debug.sh main;
-fi
-
-# We check for $create_new_container, because if we're about to
-# create a new container, we want to display the full `docker` run
-# command before exiting, thus this code is also repeated in ./start_container
-if [[ -n $dry_run ]] && [[ -z $create_new_container ]]; then
-  echo -e "$(ind 4; color yellow) DRY RUN (-y flag used). Exiting without performing any actions.\n"
-  exit
-fi
-
-if [[ "$decision_tree_result" == *"ERROR"* ]]; then exit 1; fi
-
 # Run any command that's an executable inside ./bin/ if we see a "-c" flag, then exit.
 # because we source it, it means it gets access to all the variables already created
 # in this script, which is very useful. This also means that each script in ./bin/ must
@@ -166,6 +143,29 @@ if [[ -n "$run_command" ]]; then
     exit $?
   fi
 fi
+
+# Makes important decision of whether to start a new container, connect
+# an existing one, which image to choose if a new container is created etc.
+# Read ./documentation/DECISION_TREE.txt for details.
+source $DOCK_PATH/lib/decision_tree.sh
+
+# This is might be useful to understand the logic of determining image/container names.
+# Even though we print the full docker command anyway, you don't get to see all the variables
+# that are involved in making the decision of whether to create a new container or start/connect
+# to an existing one and which image to use.
+if [[ -n $debug ]] || [[ -n $dry_run ]];
+  then source $DOCK_PATH/lib/debug.sh main;
+fi
+
+# We check for $create_new_container, because if we're about to
+# create a new container, we want to display the full `docker` run
+# command before exiting, thus this code is also repeated in ./start_container
+if [[ -n $dry_run ]] && [[ -z $create_new_container ]]; then
+  echo -e "$(ind 4; color yellow) DRY RUN (-y flag used). Exiting without performing any actions.\n"
+  exit
+fi
+
+if [[ "$decision_tree_result" == *"ERROR"* ]]; then exit 1; fi
 
 # Heavy lifting code to actually launch a Docker container
 source $DOCK_PATH/bin/start_container # will exit if it cannot start the container

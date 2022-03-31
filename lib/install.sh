@@ -47,21 +47,26 @@ check_requirements() {
   fi
 }
 
+# Create a new docker network bridge, name it $DOCK_NETWORK_NAME
+# and find out its ip address range. If already exists, just get the ip
+# address range.
+create_network() {
+  printf "\n$(color dim)"
+  echo -en "$(ind 4)* Creating a dock0 network bridge..."
+  if [[ -n "$(docker network ls | grep "\s$DOCK_NETWORK_NAME\s")" ]]; then
+    echo "ALREADY EXISTS"
+  else
+    network_bridge_id="$(docker network create $DOCK_NETWORK_NAME)"
+    echo "DONE."
+  fi
 
-# Ask user wants the installer to download a default dock-compatible image
-# and import ("load" in Docker terms) it automatically. Offer to download
-# through a magnet link.
-get_image_file() {
-  #
-  #   a) If already downloaded, ask for path to the .tgz archive with the image
-  #      or assume current directory.
-  #
-  #   b) If user opts to automatically download from the server,
-  #      download to $SCRIPT_PATH, use curl to download it.
-  #
+  network_ip_range=$(docker network inspect $DOCK_NETWORK_NAME | \
+    grep 'Gateway":' | grep -oE '"[^"]+"$' | tr -d '"' | sed 's/.1$//'
+  )
+}
+
+import_image() {
   printf "$(color dim)"
-  # (1) Get the image file
-
   echo -e "$(ind 4)* Obtaining/locating default image"
   while [[ $user_input_image == "" ]]; do
     echo -e "$(ind 8; color off)Do you have the default image or do you want to download it?"
@@ -85,22 +90,9 @@ get_image_file() {
     printf "$(color dim)"
 
     if [[ $user_input_bittorrent == "y" ]]; then
-      magnet_link="$(cat $SCRIPT_PATH/README | grep -oE 'magnet:.+$')"
-      echo -e "\n$(ind 4)Use the magnet link below to get the image via BitTorrent."
-      echo -e "$(ind 4)When it's done, restart this installation and provide path"
-      echo -e "$(ind 4)to the downloaded filename in the previous step."
-      echo -e "$(ind 4)And please also seed this torrent too, if you can."
-      echo -e "\n$(ind 4; color blue)$magnet_link$(color off; color dim)\n"
-      exit
+
     elif [[ $user_input_bittorrent == "n" ]] || [[ $user_input_bittorrent == "d" ]]; then
-      dock_image_source="https://dock.orion3.space/dock-images"
-      dock_image_fn="dock_ubuntu20_stable.tgz"
-      echo -e "$(ind 8; color green)Ok. Downloading directly from"
-      echo -e "$(ind 12; color blue)$dock_image_source/$dock_image_fn$(color off)"
-      echo -e "$(ind 8)Please wait until downloading is complete -"
-      echo -e "$(ind 8)the installation will proceed automatically.$(color dim)"
-      curl $dock_image_source/$dock_image_fn --output $dock_image_fn
-      image_local_path="$dock_image_fn"
+
     fi
   elif [[ "$user_input_image" == "q" ]]; then
     echo -e "Exiting.$(color off)"
@@ -110,40 +102,6 @@ get_image_file() {
   fi
 }
 
-# Import image with with `docker image load -i`, show the output.
-# Exit with error if file doesn't exist (maybe wrong path specified?).
-import_image() {
-  printf "\n$(color dim)"
-  image_local_path="$(echo "$image_local_path" | sed "s|^~|$HOME|")"
-  echo -en "$(ind 4)* Importing image..."
-  if test -f $image_local_path; then
-    image_full_name=$(docker image load -i $image_local_path | sed 's/^Loaded image: //')
-    echo "DONE."
-    echo -e "$(ind 8) Loaded image: $(color cyan)$image_full_name$(color off)"
-  else
-    >&2 echo -e "\n$(color red)ERROR: file with image file not found"
-    >&2 echo -e "$(color red)       ($image_local_path)"
-    exit 1
-  fi
-}
-
-# Create a new docker network bridge, name it $DOCK_NETWORK_NAME
-# and find out its ip address range. If already exists, just get the ip
-# address range.
-create_network() {
-  printf "\n$(color dim)"
-  echo -en "$(ind 4)* Creating a dock0 network bridge..."
-  if [[ -n "$(docker network ls | grep "\s$DOCK_NETWORK_NAME\s")" ]]; then
-    echo "ALREADY EXISTS"
-  else
-    network_bridge_id="$(docker network create $DOCK_NETWORK_NAME)"
-    echo "DONE."
-  fi
-
-  network_ip_range=$(docker network inspect $DOCK_NETWORK_NAME | \
-    grep 'Gateway":' | grep -oE '"[^"]+"$' | tr -d '"' | sed 's/.1$//'
-  )
-}
 
 # Copy dockrc.template to $HOME/.dockrc
 # If the file already exists, then ask user if they'd like to replace it.

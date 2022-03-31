@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-docker image tag $1 $2
-docker rmi $1
+source $HOME/.dockrc
+source $DOCK_PATH/lib/image.sh
+Image_rename $1 $2

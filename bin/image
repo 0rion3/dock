@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+source $HOME/.dockrc
+DOCK_URL="${DOCK_URL:-"https://dock.orion3.space"}"
+
+if [[ -n $DEBUG ]]; then
+  docker() {
+    >&2 echo "${@}"
+  }
+  curl() {
+    >&2 echo "${@}"
+  }
+  DEBUG=1
+fi
+
+source $DOCK_PATH/lib/get_image.sh
+source $BASHJAZZ_PATH/utils/formatting.sh
+
+# Fetches and imports images for the user based on the image name provided in $1.
+# An image name is actually an alias and one image may have plenty of aliases.
+# Aliases are currently defined remotely in the file that this script fetches
+# from the official website: https://dock.orion3.space/images.txt
+#
+# The take a look at that file, you'll see that you can install the same image
+# by typing these commands:
+#
+#   $ ./get_image hub default
+#   $ ./get_image hub ubuntu20
+#   $ ./get_image hub dock:ubuntu20:latest
+#
+# When you take a look at the https://dock.orion3.space/images.txt,
+# note that the last alias on the aliases be used to tag the image if
+# the $source_name of the image is found under one of aliases
+# in https://dock.orion3.space/images.txt (and if not - it will remain
+# as is).
+#
+# To clarify:
+#
+#   * $image_name is the second positional argument, provided by the user,
+#     basically it's one of the images aliases that go
+#     on the first line of each image section in https://dock.orion3.space/images.txt
+#
+#   * $source_image_name is the name that's specified in the aliases line of the
+#     each image section.
+#
+#   * $target_image_name is the name that the image will be re-tagged into
+#     once imported. It may not change at all if $image_name alias isn't present
+#     in the official https://dock.orion3.space/images.txt
+#
+#     So, this file doesn't actually limit what you can download, only makes
+#     sure the official dock-compatible images are downloaded from correct
+#     sources and re-tagged with correct names.
+
+cmd=$1
+shift
+name=${1:-default}
+source_type=$2
+
+printf "\n$(color dim)"
+
+# Fetch remote list
+GetImage_remote_list
+
+case $cmd in
+  list)           GetImage_print_remote_list;;
+  link-for)       GetImage_link_for $name $source_type;;
+  links-for)      GetImage_all_links_for $name | sed -E 's| |\n\n|g';;
+  target-tag-for) GetImage_target_name $name;;
+  import)         GetImage_import $name $source_type;;
+  *)
+                  echo -e  "$(color yellow; ind 4)BAD ARGUMENTS$(color off)"
+                  echo -en "$(ind 8; color gray)Usage: "
+                  echo -e  "$(color off; color dim)dock -c image $(color off) \\"
+                  echo -e  "$(ind 12) {list|link-for|links-for|target-tag-for|import} \\"
+                  echo -e  "$(ind 12) [IMG_ALIAS|FILE_NAME|URL] [LINK_TYPE (url|magnet|hub)]"
+esac
+
+printf "$(color off)\n"

@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-source $HOME/.dockrc
+#
+# This script may be called by the ../install script, which means
+# ~/.dockrc may not exist yet. But then the $DOCK_PATH and $BASHJAZZ_PATH 
+# variables will be provided.
+if test -f $HOME/.dockrc; then source $HOME/.dockrc; fi
+
 source $DOCK_PATH/lib/image.sh
 source $BASHJAZZ_PATH/utils/colors.sh
 source $BASHJAZZ_PATH/utils/split_string.sh

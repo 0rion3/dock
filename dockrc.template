@@ -78,3 +78,11 @@ TERMINAL_ROOT_THEME="DockguestRoot"
 # what's inside the image without making him read tons of documentation.
 #
 #DISABLE_DOCK_WELCOME_MESSAGE=1
+
+# Official site, form which images and some other things MAY be downloaded.
+# For Docker Images - Docker Hub will be attempted first, though.
+# But this is still needed by the $DOCK_PATH/bin/get-image command to pull
+# the list of dock-compatible images. This address may change. As `dock`
+# is updated, it will notify you when these changes are needed, although this
+# kind of change should be very very rate.
+DOCK_URL="https://dock.orion3.space"

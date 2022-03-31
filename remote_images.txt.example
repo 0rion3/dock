@@ -1,0 +1,28 @@
+# This file contains links to images, both URL and magnet.
+# Each image record is separated by a blank line.
+#
+#   1. The first line are aliases of a certain images, separated
+#      by spaces. The last alias will be used to tag the fetched image upon
+#      importing it. First line may contain multiple names separated
+#      by a spaces.
+#
+#   2. The following lines may either be:
+#
+#     * Direct URL to the .tgz archive
+#     * Docker Hub name
+#     * Magnet BitTorrent link
+#
+#   * IMAGE_NAME as it would appear when imported
+#   * URL for direct download
+#   * Magnet link for BitTorrent download
+#
+# This file is used by the ./bin/get-image script and the installation script
+# (which uses ./bin/get_image). If no line the script may do several things,
+# one of which is to assume an image to get is an url, while another thing is
+# to use the default image, also listed here.
+
+default ubuntu ubuntu20 dock/ubuntu20:stable
+  orion3/ubuntu20:stable
+  https://dock.orion3.space/dock-images/dock_ubuntu20_stable.tzg
+  magnet:?xt=urn:btih:2959a451c91d1c298556839e30c42bed8416fe1c&dn=dock%5Fubuntu20%5F240322%5FSQ.tgz&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969
+
