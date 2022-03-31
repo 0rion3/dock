@@ -292,21 +292,25 @@ a simple way to do this. Try:
 
     $ dock -c image list
 
-This displays a list of images available for download.
-Each line represents a particular image with all its multiple aliases.
+This displays a list of stable images available for automatic download
+and approved by the `dock` maintainer(s). Each line represents a particular
+image with all its multiple aliases. The last alias on each line will be used
+to tag the image when it's downloaded:
 
     $ dock -c image import nodejs hub
 
-This command pulls a stable image from orion3 Docker Hub repo,
-then tags it as dock/ubuntu20-nodejs16:stable, because
-the image would normally have a different name. At
-the time of writing the image on Docker Hub which corresponds
-to "nodejs" alias is "called orion3/ubuntu20-nodejs16:March30_2022"
+This command pulls a stable image from orion3 Docker Hub repo, then tags it as
+dock/ubuntu20-nodejs16:stable, because at Docker Hub the image would normally
+have a different name. At the time of writing the image on Docker Hub which
+corresponds to "nodejs" alias is called "orion3/ubuntu20-nodejs16:March30_2022".
 
+Instead of pulling it from Docker Hub, you ask for a magnet link and use a
+BitTorrent client to download the image:
 
-If you downloaded a .tgz archive with the image you can import it with this
-command:
+    $ dock -c image import nodejs magnet
 
+In this case, when the download is completed and you have a .tgz archive with
+the image you can import it with this command:
 
     $ dock -c image import dock_ubuntu20-nodejs16_300322_SQ.tgz file
 
@@ -315,6 +319,8 @@ If not, specify the full path:
 
     $ dock -c image import ~/Downloads/dock_ubuntu20-nodejs16_300322_SQ.tgz file
 
+
+  [1] https://dock.orion3.space/images.txt
 
 EXAMPLES
 --------
