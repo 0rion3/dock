@@ -165,7 +165,7 @@ INSTALLATION
 
     [1] https://dock.orion3.space/releases/dock_stable.tgz
 
-    [2] magnet:?xt=urn:btih:2959a451c91d1c298556839e30c42bed8416fe1c&dn=dock%5Fubuntu20%5F240322%5FSQ.tgz&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969
+    [2] magnet:?xt=urn:btih:5dd80539f293e8d895a8c2c8f771eef6f11c4c5e&dn=dock%5Fubuntu20%5F300322%5FSQ.tgz&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969
 
     [3] While everyone hates `tar`, because it's impossible to remember
         the correct cli-options to it (see XKCD: https://xkcd.com/1168/)
