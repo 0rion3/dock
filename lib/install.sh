@@ -90,15 +90,15 @@ import_image() {
     printf "$(color dim)"
 
     if [[ $user_input_bittorrent == "y" ]]; then
-
+      source $DOCK_PATH/bin/image import default magnet
     elif [[ $user_input_bittorrent == "n" ]] || [[ $user_input_bittorrent == "d" ]]; then
-
+      source $DOCK_PATH/bin/image import default hub
     fi
   elif [[ "$user_input_image" == "q" ]]; then
     echo -e "Exiting.$(color off)"
     exit 2
   else
-    image_local_path="$user_input_image"
+    source $DOCK_PATH/bin/image import $user_input_image file
   fi
 }
 
@@ -113,15 +113,15 @@ copy_dokrc() {
     echo -en "$(ind 4;)Would you like to overwrite it? (y/n):$(color off) "
     read user_input_overwrite_dockrc
     if [[ $user_input_overwrite_dockrc == "y" ]]; then
-      rm ~/.dockrc
-      cp $SCRIPT_PATH/dockrc.template $HOME/.dockrc
+      rm $HOME/.dockrc
+      cp $DOCK_PATH/dockrc.template $HOME/.dockrc
       echo -e "$(ind 8)FILE ~/.dockrc OVERWRITTEN."
     else
       echo -e "$(ind 8)OK. File ~/.dockrc left as is, no changes will be applied to it"
       return 1
     fi
   else
-    cp $SCRIPT_PATH/dockrc.template $HOME/.dockrc
+    cp $DOCK_PATH/dockrc.template $HOME/.dockrc
     echo "DONE.\n"
   fi
 }
@@ -136,14 +136,14 @@ replace_default_values_in_dockrc() {
   local repo="$(Image_extract_repo $image_full_name)"
   local name="$(Image_extract_name $image_full_name)"
   local tag="$(Image_extract_tag $image_full_name)"
-  sed -iE "s|^DOCK_PATH=.*$|DOCK_PATH=\"$SCRIPT_PATH\"|"                       $HOME/.dockrc
+  sed -iE "s|^DOCK_PATH=.*$|DOCK_PATH=\"$DOCK_PATH\"|"                         $HOME/.dockrc
   sed -iE "s|^DEFAULT_IMAGE_REPO=.*$|DEFAULT_IMAGE_REPO=\"$repo\"|"            $HOME/.dockrc
   sed -iE "s|^DEFAULT_IMAGE_NAME=.*$|DEFAULT_IMAGE_NAME=\"$name\"|"            $HOME/.dockrc
   sed -iE "s|^DEFAULT_IMAGE_TAG=.*$|DEFAULT_IMAGE_TAG=\"$tag\"|"               $HOME/.dockrc
   sed -iE "s|^DOCK_NETWORK_NAME=.*$|DOCK_NETWORK_NAME=\"$DOCK_NETWORK_NAME\"|" $HOME/.dockrc
   sed -iE "s|^DOCK_SUBNET=.*$|DOCK_SUBNET=\"$network_ip_range\"|"              $HOME/.dockrc
 
-  echo "$(ind 8)Set DOCK_PATH to \"$SCRIPT_PATH\""
+  echo "$(ind 8)Set DOCK_PATH to \"$DOCK_PATH\""
   echo "$(ind 8)Set DEFAULT_IMAGE_REPO to \"$repo\""
   echo "$(ind 8)Set DEFAULT_IMAGE_NAME to \"$name\""
   echo "$(ind 8)Set DEFAULT_IMAGE_TAG to \"$tag\""
@@ -177,13 +177,13 @@ add_docker_aliases() {
   echo -e "$(ind 10)Some useful aliases are shipped along with the dock toolset."
   echo -e "$(ind 10)They help work with Docker itself. These aliases can be added"
   echo -e "$(ind 10)to your shell's rc file with this line:"
-  echo -e "$(ind 14)source $SCRIPT_PATH/hostscripts/docker_aliases.sh$(color off)\n"
+  echo -e "$(ind 14)source $DOCK_PATH/hostscripts/docker_aliases.sh$(color off)\n"
   echo -en "$(ind 10; color off)Would you like to automatically add this line now? (y/n): "
   read add_docker_aliases
 
   printf "$(color dim)"
   if [[ $add_docker_aliases == "y" ]]; then
-    add_aliases_to_shellrc_file "source \"$SCRIPT_PATH/hostscripts/docker_aliases.sh\""
+    add_aliases_to_shellrc_file "source \"$DOCK_PATH/hostscripts/docker_aliases.sh\""
   fi
 
 }
@@ -194,12 +194,12 @@ symlink_bin_dock_into_user_path_dir() {
   echo -e "\n$(ind 4; color dim)* Symlinking the \`dock\` executable"
   if [[ "$PATH" == *"$HOME/bin"* ]]; then
     mkdir -p $HOME/bin 
-    ln -sf $SCRIPT_PATH/bin/dock $HOME/bin
-    echo -en "$(ind 8)Created symlink to $(color off)$SCRIPT_PATH/bin/dock$(color dim)"
+    ln -sf $DOCK_PATH/bin/dock $HOME/bin
+    echo -en "$(ind 8)Created symlink to $(color off)$DOCK_PATH/bin/dock$(color dim)"
     echo -e "$executable in $(color off)~/bin$(color dim)"
   elif [[ "$PATH" == *"$HOME/.local/bin"* ]]; then
     mkdir -p $HOME/.local/bin 
-    ln -sf $SCRIPT_PATH/bin/dock $HOME/.local/bin
+    ln -sf $DOCK_PATH/bin/dock $HOME/.local/bin
     echo -en "$(ind 8)Created symlink to $(color off)$HOME/.local/bin$(color dim)"
     echo -e "$executable in $(color off)~/.local/bin$(color dim)"
   else
@@ -214,7 +214,7 @@ symlink_bin_dock_into_user_path_dir() {
     read add_dock_executable_as_alias
 
     if [[ $add_dock_executable_as_alias == "y" ]]; then
-      add_aliases_to_shellrc_file "alias dock=$SCRIPT_PATH/bin/dock"
+      add_aliases_to_shellrc_file "alias dock=$DOCK_PATH/bin/dock"
     fi
 
   fi

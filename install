@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # No sudo privileges required to run it:
-# All the function calls are sourced from $SCRIPT_PATH/lib/install.sh
+# All the function calls are sourced from $DOCK_PATH/lib/install.sh
 
 DOCK_PATH="$( cd -P "$( dirname "$0" )" && pwd )"
 BASHJAZZ_PATH="$DOCK_PATH/vendor/bashjazz"
@@ -14,7 +14,6 @@ source $DOCK_PATH/lib/install.sh
 USER_SHELL="$(source $BASHJAZZ_PATH/utils/user_shellname.sh)"
 
 check_requirements
-get_image_file
 import_image
 create_network
 copy_dokrc && replace_default_values_in_dockrc

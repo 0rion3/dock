@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
-source $HOME/.dockrc
+if test -f $HOME/.dockrc; then source $HOME/.dockrc; fi
 DOCK_URL="${DOCK_URL:-"https://dock.orion3.space"}"
-
-if [[ -n $DEBUG ]]; then
-  docker() {
-    >&2 echo "${@}"
-  }
-  curl() {
-    >&2 echo "${@}"
-  }
-  DEBUG=1
-fi
-
 source $DOCK_PATH/lib/get_image.sh
 source $BASHJAZZ_PATH/utils/formatting.sh
 

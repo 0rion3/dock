@@ -4,7 +4,6 @@ Image_extract_repo() {
   fi
 }
 
-# Requires repo name as a second argument
 Image_extract_name() {
   echo "$1" | sed -E "s|^(.+/)?([^:]+).*$|\2|"
 }

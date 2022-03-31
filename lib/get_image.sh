@@ -90,9 +90,12 @@ GetImage_tag_after_download() {
   local source_name="$1"
   local target_name="$2"
   if [[ -n "$target_name" ]] && [[ "$source_name" != "$target_name" ]]; then
-    echo -en "$(ind 4)Tagging image $(color blue)$source_name$(color off)"
-    echo -e  "$(color dim) as $(color green)$target_name$(color off; color dim)...\n"
-    echo -e  "$(color gray)$(Image_tag $source_name $target_name)" | sed "s/^/$(ind 8)/g"
+    Image_tag $source_name $target_name > /dev/null
+    declare -g image_full_name="$target_name"
+    echo -en "$(ind 4)Tagged image $(color blue)$source_name$(color off)"
+    echo -e  "$(color dim) as $(color green)$target_name$(color off; color dim)"
+  else
+    declare -g image_full_name="$source_name"
   fi
 }
 

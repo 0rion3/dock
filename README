@@ -118,7 +118,7 @@ INSTALLATION
 
     1. GET THE `dock` UTILITIES SET
     ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-    Download the archive [1] with the stable version
+    Download the archive [1][3] with the stable version
     of the `dock` utilities set, which includes all submodules, 
     but no git-related files or other unnecessary artifacts:
 
@@ -130,23 +130,22 @@ INSTALLATION
     Clone the git repository, and place it anywhere on your file system,
     then initialize and update all git submodules in it:
 
-        $ git clone https://gitea.orion3.space/DOCK/dock.git && cd dock && \
-            git submodule init && git submodule update
+        $ git clone -b stable https://gitea.orion3.space/DOCK/dock.git && \
+            cd dock && git submodule init && git submodule update
 
 
     2. RUN THE INSTALLER SCRIPT
-    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
     Navigate to the directory with project's source code you've just obtained
     and run this command:
 
         $ ./install
 
-    It'll ask you a few questions, but it's very simple. You won't need
-    to edit any configuration files manually, if everything goes right. Among
-    other things, the script will download the default image for your either
-    directly from the official website or will offer you a magnet link [2].
-    Please consider downloading it via BitTorrent and seeding. You can then
-    tell the script the downloaded image filename to use (it'll ask).
+    It'll ask you a few questions, but they're simple.
+    You won't need to edit any configuration files manually. The script will
+    download the default image for either directly from the official Docker Hub
+    or website, but it also will offer you to use a magnet link first too [2]
+    (you can, of course, say no).
 
       NOTE:
         You may not be able to run this default image under MacOSX, although
@@ -280,6 +279,41 @@ COMMON WORKFLOW
   You can then connect to it from anywhere by simply typing:
 
      $ dock newapp
+
+OBTAINING OTHER DOCK-COMPATIBLE IMAGES
+--------------------------------------
+Dock maintainer(s) will provide a list of dock-compatible Docker
+images that can be downloaded via Docker Hub, directly through the official
+website or via a magnet link. Current list of images can be be found here [1].
+
+You don't have to manually visit this link every time and download and
+import/load the images with Docker commands. Instead, `dock` already provides
+a simple way to do this. Try:
+
+    $ dock -c image list
+
+This displays a list of images available for download.
+Each line represents a particular image with all its multiple aliases.
+
+    $ dock -c image import nodejs hub
+
+This command pulls a stable image from orion3 Docker Hub repo,
+then tags it as dock/ubuntu20-nodejs16:stable, because
+the image would normally have a different name. At
+the time of writing the image on Docker Hub which corresponds
+to "nodejs" alias is "called orion3/ubuntu20-nodejs16:March30_2022"
+
+
+If you downloaded a .tgz archive with the image you can import it with this
+command:
+
+
+    $ dock -c image import dock_ubuntu20-nodejs16_300322_SQ.tgz file
+
+That's assuming the file was downloaded into your $DOCK_PATH/tmp dir.
+If not, specify the full path:
+
+    $ dock -c image import ~/Downloads/dock_ubuntu20-nodejs16_300322_SQ.tgz file
 
 
 EXAMPLES
