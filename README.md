@@ -9,6 +9,8 @@ Please refer to the [OFFICIAL WEBSITE](https://dock.orion3.space) for clear
 documentation, guidelines and other information. The website is lightweight
 (only html & css) and will load faster than this Github page.
 
+Please consider [DONATING](https://dock.orion3.space/donate.html)
+
 INSTALLATION
 ------------
 Download (option 1):
@@ -26,7 +28,7 @@ Download (option 2):
 
 Run the installation script:
 
-   ./install
+    ./install
 
 
 USAGE
