@@ -1,6 +1,6 @@
 [submodule "vendor/bashjazz/utils"]
 	path = vendor/bashjazz/utils
-	url = https://gitea.orion3.space/bashjazz/utils.git
+	url = https://github.com/0rion3/bashjazz/utils.git
 [submodule "vendor/bashjazz/network"]
 	path = vendor/bashjazz/network
-	url = https://gitea.orion3.space/bashjazz/network.git
+	url = https://github.com/0rion3/bashjazz/network.git
