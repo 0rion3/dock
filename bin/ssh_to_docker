@@ -8,11 +8,23 @@ connection_task=${1:-connect}
 
 find $HOME/.ssh/ -name "dock_config_*" -type f -mmin +1 -delete
 
+# finding exposed, randomly chosen port for ssh
+custom_docker_ssh_port="$(docker port $container_name|grep -F -i 22/tcp|rev|cut -f 1 -d ':'|rev)"
+custom_docker_ssh_port="${custom_docker_ssh_port:-22}"
+
+# highly unlikely that Docker will expose random port under 22, it should be > 1024
+# practically it should mean we are just using non-exposed port
+config_container_ip_addr="127.0.0.1"
+if [[ "$custom_docker_ssh_port" == 22 ]];then
+  config_container_ip_addr="$container_ip_addr"
+fi
+
 # This is a temporary entry to be replaced as soon you're trying to connect to another
 # container with another ip_address
 ssh_suffix=$(date +"%T.%N" | sed 's/[^0-9]//g')
 echo "Host dock0-guest"                         >  ~/.ssh/dock_config_$ssh_suffix
-echo "HostName $container_ip_addr"              >> ~/.ssh/dock_config_$ssh_suffix
+echo "HostName $config_container_ip_addr"       >> ~/.ssh/dock_config_$ssh_suffix
+echo "Port $custom_docker_ssh_port"             >> ~/.ssh/dock_config_$ssh_suffix
 echo "StrictHostKeyChecking no"                 >> ~/.ssh/dock_config_$ssh_suffix
 echo "StrictHostKeyChecking no"                 >> ~/.ssh/dock_config_$ssh_suffix
 echo "UserKnownHostsFile /dev/null"             >> ~/.ssh/dock_config_$ssh_suffix

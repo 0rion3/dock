@@ -9,6 +9,11 @@ DEFAULT_IMAGE_TAG_NAME="stable"
 DEFAULT_IMAGE_FULL_NAME="$DEFAULT_REPO_NAME/$DEFAULT_IMAGE_NAME:$DEFAULT_IMAGE_TAG_NAME"
 BASHJAZZ_PATH="$DOCK_PATH/vendor/bashjazz"
 
+DOCKER_RUN_OPTS=''
+# useful on Windows with WSL2/Docker Desktop (may be MacOs too?) where Docker lives in different VM
+#DOCKER_RUN_OPTS='--expose 22 -P '
+
+
 # Syntax (if you haven't read through Docker documentation):
 # [HOST_PATH]:[GUEST_PATH]:[flags]
 # flags are usually `ro` or `rw` (read-only) or (read-write).

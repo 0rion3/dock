@@ -55,7 +55,7 @@ if [[ "$create_new_container" == "yes" ]]; then
 
   # This command both creats AND then starts the container.
   # Written according to Docker documentation here: https://docs.docker.com/engine/reference/commandline/run/
-  create_cmd="docker run -dit --net=$dock_network --name=$project_name $ip_address_option $privileged $mount_options"
+  create_cmd="docker run -dit $DOCKER_RUN_OPTS --net=$dock_network --name=$project_name $ip_address_option $privileged $mount_options"
   #
   # Strip the line of unnecessary whitespace where we have more than one space or tab separating each option or
   # positional argument. It's not strictly necessary, but nice for debug mode when we not only print the nice
