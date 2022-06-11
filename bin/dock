@@ -13,7 +13,7 @@ positional_arguments=()
 
 while [ $OPTIND -le "$#" ]
 do
-  if getopts v:t:u:c:hpwnMSHdy option; then
+  if getopts v:t:u:c:hHpwnMSdyIU option; then
     case $option in
       # ssh username to use when calling `./ssh_to_docker connect` below.
       # Defaults to "docker", but sometimes we want "root".
@@ -75,8 +75,14 @@ do
       #                        so it would also print the intended `docker run` command.
       (y) dry_run=1;;
       #
+      # Emit source line appropriate for .bashrc or similar
+      (I) echo "source $DOCK_PATH/hostscripts/docker_aliases.sh" ; exit 0 ;;
+      
       # It currently only displays basic information along with the version from the VERSION file.
-      (h) show_help=1;;
+      # (aaw) Added text from web page statically, allowed short help
+      (h) show_help=1; show_help_short=1;;
+      (U) show_help=1;;
+      *)  show_help=1; show_help_short=1;;
     esac
   else
     positional_arguments+=("${!OPTIND}")
@@ -85,8 +91,102 @@ do
 done
 
 if [[ -n $show_help ]]; then
-  echo "dock v$(cat VERSION)"
-  cat $DOCK_PATH/LICENSE
+    echo "dock v$(cat VERSION)"
+    cat <<EOF
+Basic Usage
+===========
+
+dock [IMAGE_NAME] [CONTAINER_NAME]
+dock [IMAGE_NAME]
+dock [CONTAINER_NAME]
+dock
+
+CLI OPTIONS
+===========
+dock provides a number of options with regards to mounting/not-mounting directories, giving containers privileged access, and some other things:
+
+-u [USER]
+   ssh username to use when connecting to the container via ssh. Defaults to "docker", but sometimes might want "root". Although, in that case, it's easier to define an alias:
+      alias dock-r="dock -u root"
+
+-v [PATH_ON_HOST:PATH_ON_GUEST[:ro]]
+   Mounts additional directories into the Docker container. Format is the same as in Docker - consult Docker manual
+
+-t [OPTIONS]
+   Defines some ssh connection options. Currently there's just one, which is the theme for the terminal to be set.
+   ATTENTION: works ONLY in Tilix terminal for now, because that's what I use, and I have not tested it in other Terminals
+
+-p
+   Run docker container with the --privileged flag. More info can be found here: https://www.redhat.com/sysadmin/privileged-flag-container-engines. It helps with setting up Wireguard in particular.
+
+-n
+   Create new container regardless of whether there's already a container with the provided name. This is only marginally useful.
+
+-M
+   DO NOT mount whatever is specified in the $DEFAULT_MOUNT_OPTIONS. Current directory would still be mounted, so use -H to prevent mounting it.
+
+-H
+   By default, current directory from which the dock script is launched will be mounted to ~/main inside the container. This option prevents it, but keeps all the other default mount options.
+
+-S
+   Don't automatically connect to the container via ssh after it's started. The DEFAULT IS TO CONNECT, so you'll immediately be inside the container in your terminal, unless this option is passed. This option is useful if you want to start your container, with, say, a database, but there isn't a point to connect to the container yourself, as you're not intending to do anything with it as a user.
+
+-d
+   Print debug information
+
+-y
+   Dry run: just show what would be the different variables involved in creating, starting and connecting to containers and the images that are either used to create containers or which existing containers are based off. At this point it will print the same info as when you use the "debug" flag -d, only without proceeding with the actions.
+
+-I
+   Write line to include in profile script (e.g., .bashrc). For example:
+      dock -I >>~/.bashrc
+
+   or inside file:
+      dock -I >>/tmp/dock-alias$$.tmp
+      source /tmp/dock-alias$$.tmp
+      rm /tmp/dock-alias$$.tmp
+
+-h
+   Show help message, use -U to see help and license
+
+-U
+   Show help message and license
+
+
+Aliases
+=======
+Use dock -I >>.bash_aliases or other file of your choice to add these aliases 
+
+di
+   lists docker images
+
+dc
+   lists docker containers, stopped or running
+
+dock-r
+   connects you to the container as root - same as dock -u root, and it accepts all the other cli-arguments that dock accepts.
+
+dcs [CONTAINER_NAME]
+   stops the container, but don't remove it. Marginally useful, for example when testing dock startup_jobs inside the container. (Interestingly enough, this is slower than stopping AND removing the container with dcr - see below).
+
+dcr [CONTAINER_NAME]
+   shuts down and removes Docker container. Don't forget to commit changes to an image if you want to retain them.
+
+dcom [CONTAINER NAME] [IMAGE_NAME]
+   commits changes from container to image.
+
+dri [FULL_IMAGE_NAME]
+   removes docker image (CAREFUL!)
+
+dc-size
+   lists Docker containers' size (will take time to calculate). Marginally useful when you feel you might have installed too much and container size needs to be checked.
+
+EOF
+    if [ -z "$show_help_short" ]
+       then
+	   cat $DOCK_PATH/LICENSE
+	   echo For short help, use dock -H
+       fi
   exit 0
 fi
 
