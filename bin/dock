@@ -91,7 +91,7 @@ do
 done
 
 if [[ -n $show_help ]]; then
-    echo "dock v$(cat VERSION)"
+    echo "dock v$(cat $DOCK_PATH/VERSION)"
     cat <<EOF
 Basic Usage
 ===========
