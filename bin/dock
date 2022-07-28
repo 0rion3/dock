@@ -13,7 +13,7 @@ positional_arguments=()
 
 while [ $OPTIND -le "$#" ]
 do
-  if getopts v:t:u:c:hpwnMSHdy option; then
+  if getopts v:t:u:c:lhpwnMSHdy option; then
     case $option in
       # ssh username to use when calling `./ssh_to_docker connect` below.
       # Defaults to "docker", but sometimes we want "root".
@@ -75,6 +75,23 @@ do
       #                        so it would also print the intended `docker run` command.
       (y) dry_run=1;;
       #
+      # Lists currently running or stopped containers formatted with colors
+      # and proper indentations. For argument --status-column the values "no",
+      # "hide" and "off" all act do the same - they hide the hide the column.
+      # If "short" is provided is value only the words "Up" or "Exited"
+      # will be printed.
+      # USAGE EXAMPLES:
+      #     dock -l --status-column=hide  --image-column=repo,name
+      #     dock -l --status-column=short --image-column=name,tag
+      #     dock -l --status-column=no
+      #     dock -l --image-column=name
+      #     dock -l
+      (l) source $DOCK_PATH/lib/list_containers.sh
+          shift
+          list_containers ${@}
+          exit $?
+          ;;
+      #
       # It currently only displays basic information along with the version from the VERSION file.
       (h) show_help=1;;
     esac
@@ -89,7 +106,6 @@ if [[ -n $show_help ]]; then
   cat $DOCK_PATH/LICENSE
   exit 0
 fi
-
 
 pos_arg1="${positional_arguments[0]}"
 pos_arg2="${positional_arguments[1]}"
