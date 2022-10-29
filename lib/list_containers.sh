@@ -1,6 +1,6 @@
 #/usr/bin/env bash
 
-# Shows ouput of docker ps in colors:
+# Shows output of `docker ps` in colors:
 #   Green - if contains is up,
 #   Dim   - if container was stopped
 #

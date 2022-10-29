@@ -34,7 +34,7 @@ do
       # Themes to use (including the default one are defined in ~/.dockrc on the host.
       (t) ssh_terminal_theme=$OPTARG;;
       #
-      # Run another command form the sourceable of bin directories, passing arguments to it.
+      # Run another command form the source-able of bin directories, passing arguments to it.
       (c) run_command=${OPTARG:-"!EMPTY!"};;
       #
       # Run docker container with the --privileged flag. More info can be found
@@ -158,7 +158,7 @@ fi
 # be aware of that fact and not throw error in case its not provided with correct arguments
 # itself (as would be the case if it was called directly), but, rather, use the existing variables from this script.
 #
-# For example, here are the two commands that should yeild equal result:
+# For example, here are the two commands that should yield equal result:
 # 
 #     $ ./dock container1 -c cleanup_container  |
 #                                               | -> both MUST do the exact same thing.

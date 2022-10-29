@@ -11,14 +11,14 @@ source $BASHJAZZ_PATH/utils/formatting.sh
 #
 # 2. $HOME/.dockrc file
 #
-# The $DEFAULT_MOUNT_OPTIONS variable defined in ~/.dockrc holds an array or values
-# that are passed to `docker run` command in this script. The default behavior is
-# to mount the current project directory ($PWD) as /home/docker/main and
-# to mount the $HOME/dev directory as /home/docker/dev inside the guest.
-# The $DEFAULT_MOUNT_OPTIONS contains source:target values separated by : as well
-# as read/write mounting mode also separated by the ":" character.
-# It's exactly the same as what `docker run` expects as
-# a value after as a value for `-v`.
+# The $DEFAULT_MOUNT_OPTIONS variable defined in ~/.dockrc holds an array
+# or values that are passed to `docker run` command in this script. The
+# default behavior is to mount the current project directory ($PWD) as
+# /home/docker/main and to mount the $HOME/dev directory as /home/docker/dev
+# inside the guest. The $DEFAULT_MOUNT_OPTIONS contains source:target values
+# separated by : as well as read/write mounting mode also separated by the
+# ":" character. It's exactly the same as what `docker run` expects as a
+# value after as a value for `-v`.
 
 if [[ "$create_new_container" == "yes" ]]; then
 
@@ -38,12 +38,13 @@ if [[ "$create_new_container" == "yes" ]]; then
     fi
   fi
 
-  # Files in both directories are used by "docker" and "root" users and appropriate
-  # symlinks are automatically created with the $host_provided/scripts/symlink_dotfiles script,
-  # upon the container creation. These mount options are hard-coded and are not affected by
-  # the -M flag (which cancels $DEFAULT_MOUNT_OPTIONS). I understand not everyone may want
-  # this setup, escpecially with the dotfiles, so an additional option to prevent
-  # these from being mount will also be added soon.
+  # Files in both directories are used by "docker" and "root" users
+  # and appropriate symlinks are automatically created with the
+  # $host_provided/scripts/symlink_dotfiles script, upon the container
+  # creation. These mount options are hard-coded and are not affected by the
+  # -M flag (which cancels $DEFAULT_MOUNT_OPTIONS). I understand not everyone
+  # may want this setup, escpecially with the dotfiles, so an additional
+  # option to prevent these from being mount will also be added soon.
   host_mount_source="$DOCK_PATH/guestmounts"
   guest_mount_target="/usr/local/share/host_provided"
   mount_options="$mount_options -v $host_mount_source/scripts:$guest_mount_target/scripts:ro "
@@ -54,31 +55,37 @@ if [[ "$create_new_container" == "yes" ]]; then
   fi
 
   # This command both creats AND then starts the container.
-  # Written according to Docker documentation here: https://docs.docker.com/engine/reference/commandline/run/
+  # Written according to Docker documentation here:
+  # https://docs.docker.com/engine/reference/commandline/run/
   create_cmd="docker run -dit $DOCKER_RUN_OPTS --net=$dock_network --name=$project_name $ip_address_option $privileged $mount_options"
   #
-  # Strip the line of unnecessary whitespace where we have more than one space or tab separating each option or
-  # positional argument. It's not strictly necessary, but nice for debug mode when we not only print the nice
-  # version, but this one liner too. Extra whitespace generally appears to due empty optional variables,
-  # such as $priviliged, for example - because most variables are surrounded by spaces, so we get 2 spaces instead
-  # of one.
+  # Strip the line of unnecessary whitespace where we have more than one
+  # space or tab separating each option or positional argument. It's not
+  # strictly necessary, but nice for debug mode when we not only print the
+  # nice version, but this one liner too. Extra whitespace generally appears
+  # to due empty optional variables, such as $privileged, for example - because
+  # most variables are surrounded by spaces, so we get 2 spaces instead of one.
   create_cmd="$(echo "$create_cmd" | sed 's/\s\s+/ /')"
 
-  # When printing the output to the user about the container-to-be-created, we'd like the docker
-  # command to look readable instead of appearing as a very long one liner. Therefore the following
-  # changes are made and then stored in the $printbl_create_cmd variable:
+  # When printing the output to the user about the container-to-be-created,
+  # we'd like the docker command to look readable instead of appearing as a
+  # very long one liner. Therefore the following changes are made and then
+  # stored in the $printbl_create_cmd variable:
   #
   # 1. Every --long-name-cli-option will be on a new line,
   #
-  # 2. Same goes for every mount option (starts with -v) as those can be long due to the fact that
-  #    they include two paths - on a host and inside the container.
+  # 2. Same goes for every mount option (starts with -v) as those can be
+  #    long due to the fact that they include two paths - on a host and inside
+  #    the container.
   #
-  # 3. Finally, $full_image_name comes last and is also on a new line, slightly shifter to left relative to other
-  #    options. Of course, $full_image_name is also clearly shown in bold green above too, but it's important
-  #    we add it to the printable version too, because of point (4) below. 
+  # 3. Finally, $full_image_name comes last and is also on a new line, slightly
+  #    shifter to left relative to other options. Of course, $full_image_name
+  #    is also clearly shown in bold green above too, but it's important we add
+  #    it to the printable version too, because of point (4) below.
   #
-  # 4. Each new line except for the last one gets an \ charachters, so users can easily copy and past the
-  #    whole command that's printed, paste it, and achieve the same result.
+  # 4. Each new line except for the last one gets an \ charachters, so users
+  #    can easily copy and past the whole command that's printed, paste it,
+  #    and achieve the same result.
   #
   printbl_create_cmd="$(echo "$create_cmd" | sed "s|$HOME|~|g")"
   printbl_create_cmd="$(echo "$printbl_create_cmd" | sed -E "s/ --/>\n$(ind 8)--/g" | sed -E "s/-v/>\n$(ind 10)-v/g")"
@@ -92,8 +99,8 @@ if [[ "$create_new_container" == "yes" ]]; then
   printf "\nAbout to create a NEW container\nnamed $(color blue)$container_name$(color off) "
   printf "from image $(color green)$full_image_name$(color off) with the following command:\n\n"
 
-  # If we're in debug mode (invoked either by -d or -y flags to the main ./dock utility,
-  # we print additionaly print the one liner as well.
+  # If we're in debug mode (invoked either by -d or -y flags to the main
+  # ./dock utility, we print additionally print the one liner as well.
   if [[ -n $debug ]]; then
     echo -e "$(color gray)[DEBUG] ONE-LINER DOCKER COMMAND THAT'S ACTUALLY INVOKED."
     echo "It should be identical to the one separated by newlines, but with spaces instead"
@@ -169,8 +176,9 @@ fi
 container_ip_addr=$(Container_ip_address 5)
 if [[ -z $container_ip_addr ]]; then exit 1; fi
 
-# If ip address was found, it means it's runnig, and user wants to automatically connect
-# via ssh (default, negated by providing the -S flag) we can run connection jobs.
+# If ip address was found, it means it's running, and user wants to
+# automatically connect via ssh (default, negated by providing the -S flag)
+# we can run connection jobs.
 if [[ -z "$do_not_connect_to_ssh" ]]; then
   Container_connection_jobs
 fi
