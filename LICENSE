@@ -1,7 +1,11 @@
-LICENCE (BSD Zero Clause License)
----------------------------------
+LICENCE (BSD Zero Clause License minus AI-training)
+---------------------------------------------------
 Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
+purpose with or without fee is hereby granted - except cases where the
+source code of this software is being used to train artificial intelligence,
+such as Github Copilot or similar, resulting in the said artificial intelligence
+product later being able to produce code or perform other operations based off
+the training it received.
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
 REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
@@ -9,13 +13,17 @@ AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
 INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
 OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.[20]
+PERFORMANCE OF THIS SOFTWARE.
 
 This software is free for all and it is allowed to use for personal, commercial
-or other peaceful purposes. No link-backs are necessary. You're allowed to clone,
-copy, modify and contribute to this project. It is provided as is with and
-maintainers and/or contributors are not responsible for any damage it may does
-(but the hope is that it actually does the opposite - good).
+or other peaceful purposes - except for the above-mentioned case of AI-training.
+Using the source code of this software to train artificial intelligence for
+any purpose is strictly prohibited.
+
+No link-backs are necessary. You're allowed to clone, copy, modify and contribute
+to this project. It is provided as is with and maintainers and/or contributors
+are not responsible for any damage it may does (but the hope is that it actually
+does the opposite - good).
 
 
 THINGS NOT CONCERNING LICENSING
