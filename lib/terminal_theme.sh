@@ -6,7 +6,11 @@ source $HOME/.dockrc
 #       See documentation/TERMINALS.txt
 
 if [[ $ssh_username == "root" ]]; then
-  ssh_terminal_theme=$TERMINAL_ROOT_THEME
+  if [[ -z "${TERMINAL_ROOT_THEMES[$project_name]}" ]]; then
+    ssh_terminal_theme="$TERMINAL_ROOT_THEME"
+  else
+    ssh_terminal_theme="${TERMINAL_ROOT_THEMES[$project_name]}"
+  fi
 fi
 
 if [[ -z $ssh_terminal_theme ]]; then

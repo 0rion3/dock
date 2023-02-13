@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 cd $HOME
 
 # This script is only to be run manually by image maintainers.
@@ -52,12 +52,17 @@ touch .local_profile
 # 3. Finally, source everything in correct order. We'll need to remove
 #    pre-existing symlinks from the previous versions the image (this is changed
 #    behavior on the part of `dock`).
-rm .profile  && echo "source $DOTFILES_PATH/.profile"  > .profile
-rm .zprofile && echo "source $DOTFILES_PATH/.zprofile" > .zprofile
-rm .bashrc   && echo "source $DOTFILES_PATH/.bashrc"   > .bashrc
-rm .zshrc    && echo "source $DOTFILES_PATH/.zshrc"    > .zshrc
-rm .inputrc  && echo "source $DOTFILES_PATH/.inputrc"  > .inputrc
-rm .vimrc    && echo "so $DOTFILES_PATH/.vimrc"        > .vimrc
+rm -f .profile  && echo "source $DOTFILES_PATH/.profile"  > .profile
+rm -f .zprofile && echo "source $DOTFILES_PATH/.zprofile" > .zprofile
+rm -f .bashrc   && echo "source $DOTFILES_PATH/.bashrc"   > .bashrc
+rm -f .zshrc    && echo "source $DOTFILES_PATH/.zshrc"    > .zshrc
+rm -f .inputrc  && echo "source $DOTFILES_PATH/.inputrc"  > .inputrc
+rm -f .inputrc  && echo "source $DOTFILES_PATH/.inputrc"  > .inputrc
+rm -f .vimrc    && echo "so $DOTFILES_PATH/.vimrc"        > .vimrc
+rm -f .shared_shell_env  && \
+  echo "source $DOTFILES_PATH/.shared_shell_env"          > .shared_shell_env
+rm -f .shared_shell_profile && \
+  echo "source $DOTFILES_PATH/.shared_shell_profile"      > .shared_shell_profile
 
 # 3a. Let's add a warning about potential changes to these files by third-party
 #     installation scripts.

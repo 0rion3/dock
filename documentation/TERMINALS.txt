@@ -30,7 +30,8 @@ thing, though), this file will be updated with appropriate instructions.
     3. Try connecting to the container using the `dock` command
        and see that your theme had changed.
 
-  You can create other themes too, as in fact, suggested by the ./dockrc.template
-  file and assign each theme its own container name. If your container name
-  containers dots "." as they frequently might if you create them with `dock`,
-  you should replace dots with dashes "-" in ~/.dockrc.
+  You can create other themes too, as in fact, suggested by
+  the ./dockrc.template.sh file and assign each theme its own container
+  name. If your container name containers dots "." as they frequently might
+  if you create them with `dock`, you should replace dots with dashes "-"
+  in ~/.dockrc.

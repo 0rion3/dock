@@ -76,6 +76,12 @@ declare -A TERMINAL_THEMES=(  \
 # Whenever you connect as root (dock -r) you this will be the default theme.
 TERMINAL_ROOT_THEME="DockguestRoot"
 
+declare -A TERMINAL_ROOT_THEMES=(  \
+ [container.nameA]=DockRoot1 \
+ [container.nameB]=DockRoot2 \
+ [container.nameC]=DockRoot3 \
+)
+
 # Annoyed by the welcome message? Disable it.
 # Unfortunately, it currently disables it for ALL containers,
 # not just the ones you're already working with, because the idea

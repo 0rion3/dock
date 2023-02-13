@@ -103,7 +103,7 @@ import_image() {
 }
 
 
-# Copy dockrc.template to $HOME/.dockrc
+# Copy dockrc.template.sh to $HOME/.dockrc
 # If the file already exists, then ask user if they'd like to replace it.
 copy_dokrc() {
   printf "\n$(color dim)"
@@ -114,14 +114,14 @@ copy_dokrc() {
     read user_input_overwrite_dockrc
     if [[ $user_input_overwrite_dockrc == "y" ]]; then
       rm $HOME/.dockrc
-      cp $DOCK_PATH/dockrc.template $HOME/.dockrc
+      cp $DOCK_PATH/dockrc.template.sh $HOME/.dockrc
       echo -e "$(ind 8)FILE ~/.dockrc OVERWRITTEN."
     else
       echo -e "$(ind 8)OK. File ~/.dockrc left as is, no changes will be applied to it"
       return 1
     fi
   else
-    cp $DOCK_PATH/dockrc.template $HOME/.dockrc
+    cp $DOCK_PATH/dockrc.template.sh $HOME/.dockrc
     echo "DONE.\n"
   fi
 }

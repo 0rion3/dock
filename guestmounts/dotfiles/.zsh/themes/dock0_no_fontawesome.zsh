@@ -45,8 +45,13 @@ path_prompt() {
 
 EXTRA_SPACE="\u20"
 CONTAINER_ICON="⊡"
-DOCKER_PROMPT="%F{244}% $CONTAINER_ICON $DOCKER_IMAGE_SUFFIX%{$fg_bold[blue]%} ⋑ $DOCKER_PROJECT_BASE_NAME%{$reset_color%}"
 PATH_PROMPT='$(path_prompt)'
+# This conditional allows users to define their own prompt in .zshrc and get
+# it overwritten by a file that loads the mounted read-only version of .zshrc
+# from the host machine.
+if [[ -z DOCKER_PROMPT ]]; then
+  DOCKER_PROMPT="%F{244}% $CONTAINER_ICON $DOCKER_IMAGE_SUFFIX%{$fg_bold[blue]%} ⋑ $DOCKER_PROJECT_BASE_NAME%{$reset_color%}"
+fi
 PROMPT="$DOCKER_PROMPT$PATH_PROMPT %{$fg[yellow]%}\$%f "
 RPROMPT=""
 RPROMPT='$(gitprompt)'
