@@ -264,9 +264,9 @@ endfunction
 
 function! s:define_commands()
   command! -nargs=+ -bar Plug call plug#(<args>)
-  if !executable('git')
-    return s:err('`git` executable not found. Most commands will not be available. To suppress this message, prepend `silent!` to `call plug#begin(...)`.')
-  endif
+  "if !executable('git')
+    "return s:err('`git` executable not found. Most commands will not be available. To suppress this message, prepend `silent!` to `call plug#begin(...)`.')
+  "endif
   if has('win32')
   \ && &shellslash
   \ && (&shell =~# 'cmd\(\.exe\)\?$' || s:is_powershell(&shell))
