@@ -100,14 +100,18 @@ Container_start_sshd() {
 
 Container_startup_jobs() {
   Container_update_etc_hosts
-  Container_exec 'test -f /root/dock_bin/startup_jobs && /root/dock_bin/startup_jobs'
-  Container_exec 'test -f /home/docker/dock_bin/startup_jobs && /home/docker/dock_bin/startup_jobs'
+  Container_exec \
+    'test -f /root/dock_bin/startup_jobs && /root/dock_bin/startup_jobs'
+  Container_exec -u docker \
+    'test -f /home/docker/dock_bin/startup_jobs && /home/docker/dock_bin/startup_jobs'
 }
 
 Container_connection_jobs() {
   Container_update_ssh_keys
-  Container_exec 'test -f /root/dock_bin/connection_jobs && /root/dock_bin/connection_jobs'
-  Container_exec 'test -f /home/docker/dock_bin/connection_jobs && /home/docker/dock_bin/connection_jobs'
+  Container_exec \
+    'test -f /root/dock_bin/connection_jobs && /root/dock_bin/connection_jobs'
+  Container_exec -u docker \
+    'test -f /home/docker/dock_bin/connection_jobs && /home/docker/dock_bin/connection_jobs'
 }
 
 Container_info() {
