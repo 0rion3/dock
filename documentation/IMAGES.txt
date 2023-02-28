@@ -238,7 +238,7 @@ PREPARING IMAGE FOR THE RELEASE
        To use it, installed following the instructions on the its Github page
        and then simply run this command:
 
-           $ docker-squash --tag [SQUASHED_IMAGE_NAME] [SOURCE_IMAGE_NAME]
+           $  docker-squash --tag [SQUASHED_IMAGE_NAME] [SOURCE_IMAGE_NAME]
 
        [1] https://sleeplessbeastie.eu/2021/09/17/how-to-squash-docker-image/
            https://github.com/goldmann/docker-squash
