@@ -1,6 +1,6 @@
 [submodule "vendor/bashjazz/network"]
 	path = vendor/bashjazz/network
-	url = git@pc.gitea:bashjazz/network.git
+	url = git@pc.gitea.git:bashjazz/network.git
 [submodule "vendor/bashjazz/utils"]
 	path = vendor/bashjazz/utils
-	url = git@pc.gitea:bashjazz/utils.git
+	url = git@pc.gitea.git:bashjazz/utils.git
