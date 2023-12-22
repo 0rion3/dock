@@ -34,7 +34,7 @@ do
       # Themes to use (including the default one are defined in ~/.dockrc on the host.
       (t) ssh_terminal_theme=$OPTARG;;
       #
-      # Run another command form the source-able of bin directories, passing arguments to it.
+      # Run another command from the source-able of bin directories, passing arguments to it.
       (c) run_command=${OPTARG:-"!EMPTY!"};;
       #
       # Run docker container with the --privileged flag. More info can be found

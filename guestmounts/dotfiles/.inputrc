@@ -2,3 +2,8 @@
 "\e[B": history-search-forward
 set show-all-if-ambiguous on
 set completion-ignore-case on
+
+# Settings ensuring certain typed ASCII charachters are printing
+set output-meta on
+set input-meta on
+set convert-meta off

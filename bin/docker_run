@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source $DOCK_PATH/lib/container.sh
+Container_exec -u docker
